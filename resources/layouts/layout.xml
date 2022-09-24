@@ -1,0 +1,4 @@
+<layout id="MainLayout">
+    <bitmap id="id_monkey" x="center" y="top" filename="../drawables/monkey.png" />
+    <label id="id_text" x="left" y="center" text="Hello World!" />
+</layout>
