@@ -6,8 +6,11 @@ using Toybox.Time.Gregorian;
 class DivesiteWeatherView extends WatchUi.View {
     const VERTICAL_SPACE = 4;
     const HORIZONTAL_SPACE = 4;
-    const BACKGROUND_COLOUR = Graphics.COLOR_BLACK;
-    const FOREGROUND_COLOUR = Graphics.COLOR_WHITE;
+    const COLOUR_BACKGROUND = Graphics.COLOR_BLACK;
+    const COLOUR_FOREGROUND = Graphics.COLOR_WHITE;
+    const COLOUR_WIND = 0x00ffff;
+    const COLOUR_TEMPERATURE = 0xff5555;
+    const COLOUR_WEATHER = Graphics.COLOR_YELLOW;
 
     var weatherFont;
 
@@ -29,7 +32,7 @@ class DivesiteWeatherView extends WatchUi.View {
     }
 
     function drawText(dc, cursorX, cursorY, font, text, justify, color) as Number {
-        dc.setColor(color, BACKGROUND_COLOUR);
+        dc.setColor(color, COLOUR_BACKGROUND);
         dc.drawText(cursorX, cursorY, font, text, justify);
         
         var textWidth;
@@ -59,7 +62,7 @@ class DivesiteWeatherView extends WatchUi.View {
 
     // Update the view
     function onUpdate(dc as Dc) as Void {
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.clear();
 
         var width = dc.getWidth();
@@ -84,63 +87,63 @@ class DivesiteWeatherView extends WatchUi.View {
 
         var cursorYFifthBlock = cursorY;
         var cursorX = calculateViewPortBoundaryX(cursorY, fontXtinyHeight, width, height, false);
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, WatchUi.loadResource(Rez.Strings.TodayName), Graphics.TEXT_JUSTIFY_LEFT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_BLUE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_RED) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + cloud, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_YELLOW);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + cloud, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
         cursorY += fontTinyHeight + VERTICAL_SPACE;
 
         var cursorYFourthBlock = cursorY;
         cursorX = calculateViewPortBoundaryX(cursorY, fontXtinyHeight, width, height, false);
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, WatchUi.loadResource(Rez.Strings.TomorrowName), Graphics.TEXT_JUSTIFY_LEFT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_BLUE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_RED) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_YELLOW);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
         cursorY += fontTinyHeight + VERTICAL_SPACE;
 
         var dayDuration = new Time.Duration(Gregorian.SECONDS_PER_DAY);
         var day = Time.now().add(dayDuration).add(dayDuration);
         var dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.drawText(width / 2, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_CENTER);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_BLUE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_RED) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + rain, Graphics.TEXT_JUSTIFY_LEFT, Graphics.COLOR_YELLOW);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + rain, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
         cursorY = cursorYFourthBlock;
         cursorX = calculateViewPortBoundaryX(cursorY, fontXtinyHeight, width, height, true);
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_RIGHT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, true);
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_YELLOW) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_RED) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_BLUE);
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
         cursorY = cursorYFifthBlock;
         cursorX = calculateViewPortBoundaryX(cursorY, fontXtinyHeight, width, height, true);
-        dc.setColor(FOREGROUND_COLOUR, BACKGROUND_COLOUR);
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_RIGHT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, true);
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_YELLOW) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_RED) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, Graphics.COLOR_BLUE);
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
      }
 
     // Called when this View is removed from the screen. Save the
