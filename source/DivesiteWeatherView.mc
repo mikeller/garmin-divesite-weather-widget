@@ -72,12 +72,15 @@ class DivesiteWeatherView extends WatchUi.View {
         var fontSmallHeight = dc.getFontHeight(Graphics.FONT_SMALL);
      
         var siteName = "Lake Coleridge";
-        var currentWind = "2Ξ";
-        var currentTemperature = "14°";
-        var sunCloud = 98.toChar();
-        var sun = 71.toChar();
-        var rain = 105.toChar();
-        var cloud = 101.toChar();
+        var currentWind = "" + 2;
+        var currentTemperature = "" + 14;
+        var windSymbol = "Ξ";
+        var degreesSymbol = "°";
+        var weatherSpace = 0x25fc.toChar();
+        var sunCloud = 0xf002.toChar();
+        var sun = 0xf00d.toChar();
+        var rain = 0xf015.toChar();
+        var cloud = 0xf041.toChar();
     
         var cursorY = height * 0.1f;
         dc.drawText(width * 0.5f, cursorY, Graphics.FONT_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
@@ -91,9 +94,9 @@ class DivesiteWeatherView extends WatchUi.View {
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, WatchUi.loadResource(Rez.Strings.TodayName), Graphics.TEXT_JUSTIFY_LEFT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + cloud, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind + windSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature + degreesSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + weatherSpace + cloud, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
         cursorY += fontTinyHeight + VERTICAL_SPACE;
 
         var cursorYFourthBlock = cursorY;
@@ -102,9 +105,9 @@ class DivesiteWeatherView extends WatchUi.View {
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, WatchUi.loadResource(Rez.Strings.TomorrowName), Graphics.TEXT_JUSTIFY_LEFT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind + windSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature + degreesSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + weatherSpace + sun, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
         cursorY += fontTinyHeight + VERTICAL_SPACE;
 
         var dayDuration = new Time.Duration(Gregorian.SECONDS_PER_DAY);
@@ -115,9 +118,9 @@ class DivesiteWeatherView extends WatchUi.View {
         dc.drawText(width / 2, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_CENTER);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, false);
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + rain, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind + windSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WIND) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature + degreesSymbol, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_TEMPERATURE) + 1;
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + weatherSpace + rain, Graphics.TEXT_JUSTIFY_LEFT, COLOUR_WEATHER);
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
@@ -128,9 +131,9 @@ class DivesiteWeatherView extends WatchUi.View {
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_RIGHT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, true);
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, sunCloud + weatherSpace + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature + degreesSymbol, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind + windSymbol, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
@@ -141,9 +144,9 @@ class DivesiteWeatherView extends WatchUi.View {
         dc.drawText(cursorX, cursorY, Graphics.FONT_XTINY, dayInfo.day_of_week + ", " + dayInfo.day, Graphics.TEXT_JUSTIFY_RIGHT);
         cursorY += fontXtinyHeight;
         cursorX = calculateViewPortBoundaryX(cursorY, fontTinyHeight, width, height, true);
-        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + " " + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
-        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
+        cursorX = drawText(dc, cursorX, cursorY, weatherFont, cloud + weatherSpace + sun, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WEATHER) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentTemperature + degreesSymbol, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_TEMPERATURE) - 1;
+        cursorX = drawText(dc, cursorX, cursorY, Graphics.FONT_SYSTEM_TINY, currentWind + windSymbol, Graphics.TEXT_JUSTIFY_RIGHT, COLOUR_WIND);
      }
 
     // Called when this View is removed from the screen. Save the
