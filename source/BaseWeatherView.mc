@@ -12,14 +12,7 @@ class BaseWeatherView extends WatchUi.View {
     protected const COLOUR_BACKGROUND as Number = Graphics.COLOR_BLACK;
     protected const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;
 
-    protected var screenWidth as Number?;
-    protected var screenHeight as Number?;
-
-    protected var fontXtinyHeight as Number?;
-    protected var fontTinyHeight as Number?;
-    protected var fontSmallHeight as Number?;
-
-    protected var cursorY as Number?;
+    protected var cursorY as Number = 0;
 
     function initialize() {
         View.initialize();
@@ -36,7 +29,7 @@ class BaseWeatherView extends WatchUi.View {
     function onShow() as Void {
     }
 
-    function calculateViewPortBoundaryX(y, fontHeight, screenWidth, screenHeight, rightSide) as Number {
+    function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
         var circleOriginX = screenWidth / 2;
         var circleOriginY = screenHeight / 2;
 
@@ -49,25 +42,21 @@ class BaseWeatherView extends WatchUi.View {
             angle += Math.PI;
         }
         var normalisedX = Math.cos(angle);
-        return circleOriginX - (normalisedX * circleOriginX);
+        return Math.round(circleOriginX - (normalisedX * circleOriginX));
     }
 
     function onUpdate(dc as Dc) as Void {
         dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
         dc.clear();
 
-        screenWidth = dc.getWidth();
-        screenHeight = dc.getHeight();
-
-        fontXtinyHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_XTINY);
-        fontTinyHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_TINY);
-        fontSmallHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL);
+        var screenWidth = dc.getWidth();
+        var screenHeight = dc.getHeight();
 
         var siteName = "Lake Coleridge";
     
         cursorY = screenHeight / 10;
         dc.drawText(screenWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
-        cursorY += fontSmallHeight + VERTICAL_SPACE;
+        cursorY += dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL) + VERTICAL_SPACE;
         dc.setPenWidth(LINE_WIDTH);
         dc.drawLine(0, cursorY, screenWidth, cursorY);
         cursorY += LINE_WIDTH + VERTICAL_SPACE;
