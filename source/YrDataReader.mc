@@ -6,20 +6,24 @@ class YrDataReader {
     function onReceive(responseCode as Number, data as Dictionary?, context as Method) as Void {
         System.println("Response: " + responseCode);
         System.println("Data: " + data);
-        System.println("length: " + data.toString().length());
 
         if (responseCode >= 200 && responseCode < 300 && data != null) {
-            var properties = data["properties"];
-            System.println("Last Updated: " + properties["meta"]["updated_at"]);
+            System.println("length: " + data.toString().length());
 
-            var timeSeries = properties["timeseries"];
-            var currentWindMS = timeSeries[0]["data"]["instant"]["details"]["wind_speed"];
-            var currentTemperatureC = timeSeries[0]["data"]["instant"]["details"]["air_temperature"];
+            var properties = (data["properties"] as Dictionary<String, Dictionary>);
+            System.println("Last Updated: " + (properties["meta"] as Dictionary<String, Dictionary>)["updated_at"]);
+
+            var timeSeries = (properties["timeseries"] as Array<Dictionary>);
+            var weatherContainer = timeSeries[0];
+            var weatherData = (weatherContainer["data"] as Dictionary<String, Dictionary>);
+            var weatherInstantDetails = ((weatherData["instant"] as Dictionary<String, Dictionary>)["details"] as Dictionary<String, String or Number or Float>);
+            var currentWindMS = weatherInstantDetails["wind_speed"];
+            var currentTemperatureC = weatherInstantDetails["air_temperature"];
 
             var weatherContext = [
                 currentWindMS,
                 currentTemperatureC,
-            ];
+            ] as Array<Float>;
 
             context.invoke(weatherContext);
         } else {

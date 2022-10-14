@@ -37,7 +37,7 @@ class App extends Application.AppBase {
         return [ new BaseWeatherView() ] as Array<Views or InputDelegates>;
     }
 
-    function onWeatherDataReady(weatherData as Array) as Void {
+    function onWeatherDataReady(weatherData as Array<Float>) as Void {
         WatchUi.switchToView(new WeatherView(weatherData), new WeatherBehaviorDelegate(), WatchUi.SLIDE_IMMEDIATE);
     }
 }
