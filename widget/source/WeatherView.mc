@@ -16,7 +16,7 @@ class WeatherView extends BaseWeatherView {
 
     protected var dateFont as Graphics.FontDefinition = Graphics.FONT_SYSTEM_TINY;
      
-    protected var weatherData as Array<Float> = [0.0, 0.0] as Array<Float>;
+    protected var weatherData as Array<Float or String> = [0.0, 0.0, "", ""] as Array<Float or String>;
 
     function initialize(weatherData as Array<Float>) {
         BaseWeatherView.initialize();
@@ -430,32 +430,32 @@ class WeatherView extends BaseWeatherView {
             afternoonWeatherColumnX,
         ] as Array<Number>;
 
-        drawDayForecast(dc, columnsX, cursorY, TODAY_STRING, weatherData[0], weatherData[1], "clearsky_day", "rain");
+        drawDayForecast(dc, columnsX, cursorY, TODAY_STRING, weatherData[0] as Float, weatherData[1] as Float, weatherData[2] as String, weatherData[3] as String);
         cursorY += lineHeight + VERTICAL_SPACE;
 
         var dayDuration = new Time.Duration(Gregorian.SECONDS_PER_DAY);
         var day = Time.now().add(dayDuration);
         var dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0], weatherData[1], "cloudy", "fair_day");
+        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "cloudy", "fair_day");
         cursorY += lineHeight + VERTICAL_SPACE;
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0], weatherData[1], "fog", "heavyrainandthunder");
+        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "fog", "heavyrainandthunder");
         cursorY += lineHeight + VERTICAL_SPACE;
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0], weatherData[1], "heavyrain", "lightrain");
+        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "heavyrain", "lightrain");
         cursorY += lineHeight + VERTICAL_SPACE;
 
         day = day.add(dayDuration);
         dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
 
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0], weatherData[1], "lightrainshowers_day", "snowy");
+        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "lightrainshowers_day", "snowy");
         cursorY += lineHeight + VERTICAL_SPACE;
         
         dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);

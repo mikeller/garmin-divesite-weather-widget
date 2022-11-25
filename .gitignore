@@ -52,7 +52,11 @@ Mkfile.old
 dkms.conf
 
 ## Custom
-/bin
-/obj
+.vscode
+
+/widget/bin
+/widget/obj
+
+node_modules
 
 *.swp

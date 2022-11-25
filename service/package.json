@@ -1,0 +1,15 @@
+{
+  "name": "garmin-divesite-weather-service",
+  "version": "0.1.0",
+  "description": "A service to proxy weather data from Yr for the Garmin Divesite Weather Widget.",
+  "main": "index.js",
+  "repository": "https://github.com/mikeller/garmin-divesite-weather-widget",
+  "author": "Michael Keller <mikeller@042.ch>",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "start": "node ./bin/service.js"
+  },
+  "dependencies": {
+    "debug": "^4.3.4"
+  }
+}

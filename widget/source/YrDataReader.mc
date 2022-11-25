@@ -16,14 +16,18 @@ class YrDataReader {
             var timeSeries = (properties["timeseries"] as Array<Dictionary>);
             var weatherContainer = timeSeries[0];
             var weatherData = (weatherContainer["data"] as Dictionary<String, Dictionary>);
-            var weatherInstantDetails = ((weatherData["instant"] as Dictionary<String, Dictionary>)["details"] as Dictionary<String, String or Number or Float>);
+            var weatherInstantDetails = ((weatherData["instant"] as Dictionary<String, Dictionary>)["details"] as Dictionary<String, Number or Float>);
             var currentWindMS = weatherInstantDetails["wind_speed"];
             var currentTemperatureC = weatherInstantDetails["air_temperature"];
+            var morningWeatherSymbolName = ((weatherData["next_1_hours"] as Dictionary<String, Dictionary>)["summary"] as Dictionary<String, String>)["symbol_code"];
+            var afternoonWeatherSymbolName = ((weatherData["next_6_hours"] as Dictionary<String, Dictionary>)["summary"] as Dictionary<String, String>)["symbol_code"];
 
             var weatherContext = [
                 currentWindMS,
                 currentTemperatureC,
-            ] as Array<Float>;
+                morningWeatherSymbolName,
+                afternoonWeatherSymbolName,
+            ] as Array<Float or String>;
 
             context.invoke(weatherContext);
         } else {
@@ -32,8 +36,10 @@ class YrDataReader {
     }
 
     function readWeatherData(callback as Method(weatherData as Array) as Void) as Void {
-        var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact.json";
-        // Status JSON URL:
+        var url = "https://garmin-divesite-weather-widget-service.azurewebsites.net/data";
+        // YR weather data URL (too verbose for the device):
+        //var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact.json";
+        // YR status URL:
         //var url = "https://api.met.no/weatherapi/locationforecast/2.0/status.json";
         
         var lat = -43.342;
@@ -44,13 +50,8 @@ class YrDataReader {
             "lon" => lon.format("%.3f"),
         };
 
-        var userAgent = WatchUi.loadResource(Rez.Strings.AppName) + "/0.1 " + "https://github.com/mikeller/garmin-divesite-weather-widget";
-
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
-            :headers => {
-                "User-Agent" => userAgent,
-            },
             :context => (callback as Object),
         };
 
