@@ -3,27 +3,48 @@
 'use strict';
 
 const fs = require('fs');
-const http = require('http');
+const express = require('express');
 const debug = require('debug')('service:server');
 
-const host = '0.0.0.0';
 const port = normalizePort(process.env.PORT || 8080);
 
-const rawData = fs.readFileSync('data.json');
+const rawData = fs.readFileSync('public/data.json');
 const data = JSON.parse(rawData);
 
-const requestListener = function (req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    res.writeHead(200);
-    res.end(JSON.stringify(data));
+const app = express();
 
-    debug(`Request headers\n${JSON.stringify(req.headers, null, 2)}`);
-};
+app.get('/data', (req, res, next) => {
+    debug(`Request headers:\n${JSON.stringify(req.headers, null, 2)}`);
+    debug(`Request query:\n${JSON.stringify(req.query, null, 2)}`);
 
-const server = http.createServer(requestListener);
-server.on('error', onError);
-server.on('listening', onListening);
-server.listen(port);
+    if (Object.keys(req.query).length !== 2 || !Object.hasOwn(req.query, 'lat') || !Object.hasOwn(req.query, 'lon')) {
+        returnBadRequest(req, res, next);
+
+        return;
+    }
+
+    res.json(data);
+});
+
+function returnBadRequest(req, res, next) {
+    debug(`Invalid request: ${req.url}`);
+
+    next(Object.assign(new Error(), { status: 400 }));
+}
+
+app.get('/', (req, res) => {
+    res.redirect('https://github.com/mikeller/garmin-divesite-weather-widget');
+});
+
+app.use((req, res, next) => {
+    debug(`Invalid URL: ${req.url}`);
+
+    next(Object.assign(new Error(), { status: 404 }));
+});
+
+app.listen(port, () => {
+    debug(`Listening on port ${port}.`);
+});
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
@@ -39,36 +60,4 @@ function normalizePort(val) {
   }
 
   return false;
-}
-
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      debug(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      debug(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
 }
