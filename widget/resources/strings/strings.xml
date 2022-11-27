@@ -1,4 +1,14 @@
 <strings>
     <string id="AppName">Divesite Weather</string>
+
+    <string id="LocationsTitle">Locations</string>
+    <string id="LatitudeTitle">Latitude (3 decimal places)</string>
+    <string id="LatitudeRangeError">Latitude must be between -90 and 90</string>
+    <string id="LongitudeTitle">Longitude (3 decimal places)</string>
+    <string id="LongitudeRangeError">Longitude must be between -180 and 180</string>
+    <string id="LocationDisplayNameTitle">Display name</string>
+    <string id="LocationDisplayNameError">Maximum 16 characters</string>
+    <string id="CustomWeatherApiUrlTitle">Custom Weather API URL</string>
+
     <string id="TodayName">Today</string>
 </strings>
