@@ -1,16 +1,30 @@
 import Toybox.Application;
+import Toybox.Application.Properties;
 import Toybox.Lang;
 import Toybox.WatchUi;
 import Toybox.Time.Gregorian;
 
 class App extends Application.AppBase {
+    protected var reader as YrDataReader;
 
-    var reader as YrDataReader;
+    protected var locations as Array<Dictionary> = [] as Array<Dictionary>;
+    protected var currentLocationIndex as Number = 0;
+    protected var currentDisplayName as String = "";
+    protected var started as Boolean = false;
 
     function initialize() {
         AppBase.initialize();
 
-        reader = new YrDataReader();
+        var locations = Properties.getValue("locations") as Array<Dictionary>;
+        if (locations != null) {
+            self.locations = locations;
+        }
+
+        var customUrl = Properties.getValue("customWeatherApiUrl");
+        if ("".equals(customUrl)) {
+            customUrl = null;
+        }
+        reader = new YrDataReader(customUrl);
     }
 
     // onStart() is called on application start up
@@ -25,20 +39,47 @@ class App extends Application.AppBase {
             date.sec.format("%02d")
         ]));
 
-        reader.readWeatherData(method(:onWeatherDataReady));
+        displayWeatherForLocation(currentLocationIndex);
+
+        started = true;
     }
 
-    // onStop() is called when your application is exiting
-    function onStop(state as Dictionary?) as Void {
+    function displayWeatherForLocation(locationIndex as Number) as Void {
+        if (locationIndex >= locations.size()) {
+            locationIndex = 0;
+        }
+
+        currentLocationIndex = locationIndex;
+
+        if (locations.size() > 0) {
+            var location = locations[locationIndex] as Dictionary<String, Float or String>;
+            currentDisplayName = location["displayName"] as String;
+
+            var defaultDisplayName = reader.readWeatherData(location, method(:onWeatherDataReady));
+            if ("".equals(currentDisplayName)) {
+                currentDisplayName = defaultDisplayName;
+            }
+
+        } else {
+            currentDisplayName = "No locations!";
+        }
+
+        if (started) {
+            WatchUi.switchToView(new BaseWeatherView(currentDisplayName), new WeatherBehaviorDelegate(currentLocationIndex, method(:displayWeatherForLocation)), WatchUi.SLIDE_IMMEDIATE);
+        }
+    }
+
+    function onWeatherDataReady(weatherData as Array<Float>) as Void {
+        WatchUi.switchToView(new WeatherView(weatherData, currentDisplayName), new WeatherBehaviorDelegate(currentLocationIndex, method(:displayWeatherForLocation)), WatchUi.SLIDE_IMMEDIATE);
     }
 
     // Return the initial view of your application here
     function getInitialView() as Array<Views or InputDelegates>? {
-        return [ new BaseWeatherView() ] as Array<Views or InputDelegates>;
+        return [ new BaseWeatherView(currentDisplayName), new WeatherBehaviorDelegate(currentLocationIndex, method(:displayWeatherForLocation)) ] as Array<Views or InputDelegates>;
     }
 
-    function onWeatherDataReady(weatherData as Array<Float>) as Void {
-        WatchUi.switchToView(new WeatherView(weatherData), new WeatherBehaviorDelegate(), WatchUi.SLIDE_IMMEDIATE);
+    // onStop() is called when your application is exiting
+    function onStop(state as Dictionary?) as Void {
     }
 }
 

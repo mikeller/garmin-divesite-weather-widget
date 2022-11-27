@@ -3,7 +3,20 @@ import Toybox.Communications;
 import Toybox.Lang;
 
 class YrDataReader {
-    function onReceive(responseCode as Number, data as Dictionary?, context as Method) as Void {
+    protected var url as String = "https://garmin-divesite-weather-widget-service.azurewebsites.net/data";
+
+    // YR weather data URL (too verbose for the device):
+    //var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact.json";
+    // YR status URL:
+    //var url = "https://api.met.no/weatherapi/locationforecast/2.0/status.json";
+
+    function initialize(customUrl as String?) {
+        if (customUrl != null) {
+            url = customUrl as String;
+        }
+    }
+
+    function onReceive(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
         System.println("Response: " + responseCode);
         System.println("Data: " + data);
 
@@ -29,32 +42,31 @@ class YrDataReader {
                 afternoonWeatherSymbolName,
             ] as Array<Float or String>;
 
-            context.invoke(weatherContext);
+            (context["callback"] as Method).invoke(weatherContext);
         } else {
             //TODO: Show error page
         }
     }
 
-    function readWeatherData(callback as Method(weatherData as Array) as Void) as Void {
-        var url = "https://garmin-divesite-weather-widget-service.azurewebsites.net/data";
-        // YR weather data URL (too verbose for the device):
-        //var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact.json";
-        // YR status URL:
-        //var url = "https://api.met.no/weatherapi/locationforecast/2.0/status.json";
-        
-        var lat = -43.342;
-        var lon = 171.546;
+    function readWeatherData(location as Dictionary<String, Float or String>, callback as Method(weatherData as Array) as Void) as String {
+        var latitudeString = (location["latitude"] as Float).format("%.3f");
+        var longitudeString = (location["longitude"] as Float).format("%.3f");
+        var defaultDisplayName = latitudeString + " " + longitudeString;
 
         var params = {
-            "lat" => lat.format("%.3f"),
-            "lon" => lon.format("%.3f"),
+            "lat" => latitudeString,
+            "lon" => longitudeString,
         };
 
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
-            :context => (callback as Object),
+            :context => {
+                "callback" => callback,
+            },
         };
 
         Communications.makeWebRequest(url, params, options, method(:onReceive));
+
+        return defaultDisplayName;
     }
 }

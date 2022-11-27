@@ -17,11 +17,13 @@ class WeatherView extends BaseWeatherView {
     protected var dateFont as Graphics.FontDefinition = Graphics.FONT_SYSTEM_TINY;
      
     protected var weatherData as Array<Float or String> = [0.0, 0.0, "", ""] as Array<Float or String>;
+    protected var displayName as String = "";
 
-    function initialize(weatherData as Array<Float>) {
-        BaseWeatherView.initialize();
+    function initialize(weatherData as Array<Float>, displayName as String) {
+        BaseWeatherView.initialize(displayName);
 
         self.weatherData = weatherData;
+        self.displayName = displayName;
     }
 
     // Load your resources here

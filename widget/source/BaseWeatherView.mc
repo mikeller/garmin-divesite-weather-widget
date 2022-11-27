@@ -12,10 +12,14 @@ class BaseWeatherView extends WatchUi.View {
     protected const COLOUR_BACKGROUND as Number = Graphics.COLOR_BLACK;
     protected const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;
 
+    protected var siteName as String = "";
+
     protected var cursorY as Number = 0;
 
-    function initialize() {
+    function initialize(siteName as String) {
         View.initialize();
+
+        self.siteName = siteName;
     }
 
     // Load your resources here
@@ -52,8 +56,6 @@ class BaseWeatherView extends WatchUi.View {
         var screenWidth = dc.getWidth();
         var screenHeight = dc.getHeight();
 
-        var siteName = "Lake Coleridge";
-    
         cursorY = screenHeight / 10;
         dc.drawText(screenWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
         cursorY += dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL) + VERTICAL_SPACE;
