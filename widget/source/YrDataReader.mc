@@ -18,31 +18,16 @@ class YrDataReader {
 
     function onReceive(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
         System.println("Response: " + responseCode);
-        System.println("Data: " + data);
 
         if (responseCode >= 200 && responseCode < 300 && data != null) {
             System.println("length: " + data.toString().length());
 
-            var properties = (data["properties"] as Dictionary<String, Dictionary>);
-            System.println("Last Updated: " + (properties["meta"] as Dictionary<String, Dictionary>)["updated_at"]);
+            var properties = data["properties"] as Dictionary<String, Dictionary>;
+            System.println("Expires: " +  (properties["meta"] as Dictionary<String, Dictionary>)["expires"]);
 
-            var timeSeries = (properties["timeseries"] as Array<Dictionary>);
-            var weatherContainer = timeSeries[0];
-            var weatherData = (weatherContainer["data"] as Dictionary<String, Dictionary>);
-            var weatherInstantDetails = ((weatherData["instant"] as Dictionary<String, Dictionary>)["details"] as Dictionary<String, Number or Float>);
-            var currentWindMS = weatherInstantDetails["wind_speed"];
-            var currentTemperatureC = weatherInstantDetails["air_temperature"];
-            var morningWeatherSymbolName = ((weatherData["next_1_hours"] as Dictionary<String, Dictionary>)["summary"] as Dictionary<String, String>)["symbol_code"];
-            var afternoonWeatherSymbolName = ((weatherData["next_6_hours"] as Dictionary<String, Dictionary>)["summary"] as Dictionary<String, String>)["symbol_code"];
+            var timeseries = properties["timeseries"] as Array<Dictionary>;
 
-            var weatherContext = [
-                currentWindMS,
-                currentTemperatureC,
-                morningWeatherSymbolName,
-                afternoonWeatherSymbolName,
-            ] as Array<Float or String>;
-
-            (context["callback"] as Method).invoke(weatherContext);
+            (context["callback"] as Method).invoke(timeseries);
         } else {
             //TODO: Show error page
         }
