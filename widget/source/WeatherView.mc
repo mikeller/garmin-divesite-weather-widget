@@ -9,20 +9,21 @@ class WeatherView extends BaseWeatherView {
     protected const COLOUR_TEMPERATURE as Number = 0xff5555;
     protected const COLOUR_WEATHER as Number = Graphics.COLOR_YELLOW;
 
+    protected const WEATHER_SYMBOL_UNKNOWN_STRING as String = "  ?";
     protected const METRES_PER_SECOND_STRING as String = "m/s";
     protected const DEGREES_C_STRING as String = "°C";
 
     protected const TODAY_STRING as String = (WatchUi.loadResource(Rez.Strings.TodayName) as String);
 
     protected var dateFont as Graphics.FontDefinition = Graphics.FONT_SYSTEM_TINY;
-     
-    protected var weatherData as Array<Float or String> = [0.0, 0.0, "", ""] as Array<Float or String>;
+
+    protected var weatherSeries as Array<Dictionary> = [{}] as Array<Dictionary>;
     protected var displayName as String = "";
 
-    function initialize(weatherData as Array<Float>, displayName as String) {
+    function initialize(weatherSeries as Array<Dictionary>, displayName as String) {
         BaseWeatherView.initialize(displayName);
 
-        self.weatherData = weatherData;
+        self.weatherSeries = weatherSeries;
         self.displayName = displayName;
     }
 
@@ -38,8 +39,131 @@ class WeatherView extends BaseWeatherView {
         BaseWeatherView.onShow();
     }
 
+    function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>) as Void {
+        var nameString;
+        if (day instanceof String) {
+            nameString = day;
+        } else {
+            var dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
+            nameString = dayInfo.day_of_week + ", " + dayInfo.day;
+        }
+
+        var data = weatherInfo["data"] as Dictionary<String, Float or String>;
+
+        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
+        dc.drawText(columnsX[0], cursorY, dateFont, nameString, Graphics.TEXT_JUSTIFY_LEFT);
+
+        var windSpeedMs = data["max_wind_speed"];
+        if (windSpeedMs != null) {
+            dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
+            dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(windSpeedMs as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
+        }
+
+        var airTemperatureC = data["max_air_temperature"];
+        if (airTemperatureC != null) {
+            dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
+            dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(airTemperatureC as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
+        }
+
+        var morningWeatherSymbol = data["morning_symbol_code"];
+        if (morningWeatherSymbol != null) {
+            var morningWeatherIcon = loadWeatherIcon(morningWeatherSymbol as String);
+            if (morningWeatherIcon != null) {
+                dc.drawBitmap(columnsX[3], cursorY, morningWeatherIcon);
+            } else {
+                dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
+                dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            }
+        }
+
+        var afternoonWeatherSymbol = data["afternoon_symbol_code"];
+        if (afternoonWeatherSymbol != null) {
+            var afternoonWeatherIcon = loadWeatherIcon(afternoonWeatherSymbol as String);
+            if (afternoonWeatherIcon != null) {
+                dc.drawBitmap(columnsX[4], cursorY, afternoonWeatherIcon);
+            } else {
+                dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
+                dc.drawText(columnsX[4], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            }
+        }
+    }
+
+    function onUpdate(dc as Dc) as Void {
+        BaseWeatherView.onUpdate(dc);
+
+        var screenWidth = dc.getWidth();
+        var screenHeight = dc.getHeight();
+
+        var lineHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_TINY);
+        if (dc.getFontHeight(Graphics.FONT_SYSTEM_XTINY) == lineHeight) {
+            dateFont = Graphics.FONT_SYSTEM_XTINY;
+        }
+
+        var nameColumnX = calculateViewPortBoundaryX(cursorY, lineHeight, screenWidth, screenHeight, false);
+        var nameColumnXBottom = calculateViewPortBoundaryX(cursorY + 4 * (lineHeight + VERTICAL_SPACE), lineHeight, screenWidth, screenHeight, false);
+        if (nameColumnXBottom > nameColumnX) {
+            nameColumnX = nameColumnXBottom;
+        }
+
+        var windColumnX = nameColumnX + dc.getTextWidthInPixels("Mon, 22", dateFont) + HORIZONTAL_SPACE + dc.getTextWidthInPixels("10", Graphics.FONT_SYSTEM_TINY);
+        var temperatureColumnX = windColumnX + HORIZONTAL_SPACE + dc.getTextWidthInPixels("-10", Graphics.FONT_SYSTEM_TINY);
+        var morningWeatherColumnX = temperatureColumnX + 2 * HORIZONTAL_SPACE;
+        // Symbols are square, so their width is equal to lineHeight
+        var afternoonWeatherColumnX = morningWeatherColumnX + HORIZONTAL_SPACE + lineHeight;
+
+        var columnsX = [
+            nameColumnX,
+            windColumnX,
+            temperatureColumnX,
+            morningWeatherColumnX,
+            afternoonWeatherColumnX,
+        ] as Array<Number>;
+
+        var index = 0;
+        var count = 0;
+        while (count < 5) {
+            var weatherInfo = weatherSeries[index];
+
+            var day = Gregorian.moment({
+                :year => ((weatherInfo["time"] as String).substring( 0, 4) as String).toNumber(),
+                :month => ((weatherInfo["time"] as String).substring( 5, 7) as String).toNumber(),
+                :day => ((weatherInfo["time"] as String).substring( 8, 10) as String).toNumber(),
+            });
+
+            var todayInfo= Gregorian.info(Time.now(), Time.FORMAT_LONG);
+            var today = Gregorian.moment({
+                :year => todayInfo.year as Number,
+                :month => todayInfo.month as Number,
+                :day => todayInfo.day as Number,
+            });
+
+            if (day.compare(today) >= 0) {
+                if (day.compare(today) == 0) {
+                    day = TODAY_STRING;
+                }
+                drawDayForecast(dc, columnsX, cursorY, day, weatherInfo as Dictionary<String, String or Dictionary>);
+                cursorY += lineHeight + VERTICAL_SPACE;
+
+                count++;
+            }
+
+            index++;
+        }
+
+        dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
+        dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+        dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
+        dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+    }
+
+    // Called when this View is removed from the screen. Save the
+    // state of this View here. This includes freeing resources from
+    // memory.
+    function onHide() as Void {
+    }
+
+    // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
     function loadWeatherIcon(name as String) as BitmapResource? {
-        // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
         var weatherIcon;
         switch (name) {
         case "clearsky_day":
@@ -377,98 +501,5 @@ class WeatherView extends BaseWeatherView {
         }
 
         return weatherIcon;
-    }
-
-    function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, nameString as String, windMS as Float, temperatureC as Float, morningWeatherSymbolName as String, afternoonWeatherSymbolName as String) as Void {
-        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[0], cursorY, dateFont, nameString, Graphics.TEXT_JUSTIFY_LEFT);
-        dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(windMS).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(temperatureC).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
-        var weatherIcon = loadWeatherIcon(morningWeatherSymbolName);
-        if (weatherIcon != null) {
-            dc.drawBitmap(columnsX[3], cursorY, weatherIcon);
-        } else {
-            dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
-            dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, "?", Graphics.TEXT_JUSTIFY_LEFT);
-        }
-        weatherIcon = loadWeatherIcon(afternoonWeatherSymbolName);
-        if (weatherIcon != null) {
-            dc.drawBitmap(columnsX[4], cursorY, weatherIcon);
-        } else {
-            dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
-            dc.drawText(columnsX[4], cursorY, Graphics.FONT_SYSTEM_TINY, "?", Graphics.TEXT_JUSTIFY_LEFT);
-        }
-    }
-
-    function onUpdate(dc as Dc) as Void {
-        BaseWeatherView.onUpdate(dc);
-
-        var screenWidth = dc.getWidth();
-        var screenHeight = dc.getHeight();
-
-        var lineHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_TINY);
-        if (dc.getFontHeight(Graphics.FONT_SYSTEM_XTINY) == lineHeight) {
-            dateFont = Graphics.FONT_SYSTEM_XTINY;
-        }
-
-        var nameColumnX = calculateViewPortBoundaryX(cursorY, lineHeight, screenWidth, screenHeight, false);
-        var nameColumnXBottom = calculateViewPortBoundaryX(cursorY + 4 * (lineHeight + VERTICAL_SPACE), lineHeight, screenWidth, screenHeight, false);
-        if (nameColumnXBottom > nameColumnX) {
-            nameColumnX = nameColumnXBottom;
-        }
-
-        var windColumnX = nameColumnX + dc.getTextWidthInPixels("Mon, 22", dateFont) + HORIZONTAL_SPACE + dc.getTextWidthInPixels("10", Graphics.FONT_SYSTEM_TINY);
-        var temperatureColumnX = windColumnX + HORIZONTAL_SPACE + dc.getTextWidthInPixels("-10", Graphics.FONT_SYSTEM_TINY);
-        var morningWeatherColumnX = temperatureColumnX + 2 * HORIZONTAL_SPACE;
-        var afternoonWeatherColumnX = morningWeatherColumnX + HORIZONTAL_SPACE + lineHeight;
-
-        var columnsX = [
-            nameColumnX,
-            windColumnX,
-            temperatureColumnX,
-            morningWeatherColumnX,
-            afternoonWeatherColumnX,
-        ] as Array<Number>;
-
-        drawDayForecast(dc, columnsX, cursorY, TODAY_STRING, weatherData[0] as Float, weatherData[1] as Float, weatherData[2] as String, weatherData[3] as String);
-        cursorY += lineHeight + VERTICAL_SPACE;
-
-        var dayDuration = new Time.Duration(Gregorian.SECONDS_PER_DAY);
-        var day = Time.now().add(dayDuration);
-        var dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
-
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "cloudy", "fair_day");
-        cursorY += lineHeight + VERTICAL_SPACE;
-
-        day = day.add(dayDuration);
-        dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
-
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "fog", "heavyrainandthunder");
-        cursorY += lineHeight + VERTICAL_SPACE;
-
-        day = day.add(dayDuration);
-        dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
-
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "heavyrain", "lightrain");
-        cursorY += lineHeight + VERTICAL_SPACE;
-
-        day = day.add(dayDuration);
-        dayInfo = Gregorian.info(day, Time.FORMAT_LONG);
-
-        drawDayForecast(dc, columnsX, cursorY, dayInfo.day_of_week + ", " + dayInfo.day, weatherData[0] as Float, weatherData[1] as Float, "lightrainshowers_day", "snowy");
-        cursorY += lineHeight + VERTICAL_SPACE;
-        
-        dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
-    }
-
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
-    function onHide() as Void {
     }
 }

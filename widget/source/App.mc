@@ -69,8 +69,8 @@ class App extends Application.AppBase {
         }
     }
 
-    function onWeatherDataReady(weatherData as Array<Float>) as Void {
-        WatchUi.switchToView(new WeatherView(weatherData, currentDisplayName), new WeatherBehaviorDelegate(currentLocationIndex, method(:displayWeatherForLocation)), WatchUi.SLIDE_IMMEDIATE);
+    function onWeatherDataReady(weatherSeries as Array<Dictionary>) as Void {
+        WatchUi.switchToView(new WeatherView(weatherSeries, currentDisplayName), new WeatherBehaviorDelegate(currentLocationIndex, method(:displayWeatherForLocation)), WatchUi.SLIDE_IMMEDIATE);
     }
 
     // Return the initial view of your application here
