@@ -57,6 +57,8 @@ dkms.conf
 /widget/bin
 /widget/obj
 
+/service/cache
+
 node_modules
 
 *.swp
