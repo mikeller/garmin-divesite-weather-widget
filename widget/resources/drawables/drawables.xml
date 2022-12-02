@@ -1,6 +1,8 @@
 <drawables>
     <bitmap id="LauncherIcon" filename="launcher_icon_40.png" />
 
+    <bitmap id="ConnectionProblemIcon" filename="connection_problem_icon.png" />
+
     <bitmap id="clearsky_day" filename="weather_icons/clearsky_day.png" />
     <bitmap id="clearsky_night" filename="weather_icons/clearsky_night.png" />
     <bitmap id="clearsky_polartwilight" filename="weather_icons/clearsky_polartwilight.png" />

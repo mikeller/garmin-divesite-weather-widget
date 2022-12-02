@@ -1,22 +1,20 @@
-import Toybox.System;
 import Toybox.WatchUi;
-import Toybox.Lang;
 
 class WeatherBehaviorDelegate extends WatchUi.BehaviorDelegate {
-    protected var locationIndex as Number;
-    protected var displayWeatherForLocation as Method(locationIndex as Number) as Void;
+    protected var displayWeatherForCurrentLocation as Method() as Void;
+    protected var nextLocation as Method() as Void;
 
-    function initialize(locationIndex as Number, displayWeatherForLocation as Method(locationIndex as Number) as Void) {
+    function initialize(displayWeatherForCurrentLocation as Method() as Void, nextLocation as Method() as Void) {
         BehaviorDelegate.initialize();
 
-        self.locationIndex = locationIndex;
-        self.displayWeatherForLocation = displayWeatherForLocation;
+        self.displayWeatherForCurrentLocation = displayWeatherForCurrentLocation;
+        self.nextLocation = nextLocation;
     }
 
     function onSelect() {
-        locationIndex++;
+        nextLocation.invoke();
 
-        displayWeatherForLocation.invoke(locationIndex);
+        displayWeatherForCurrentLocation.invoke();
 
         return false;
     }

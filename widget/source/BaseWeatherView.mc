@@ -13,13 +13,15 @@ class BaseWeatherView extends WatchUi.View {
     protected const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;
 
     protected var siteName as String = "";
+    protected var connectionProblem as Boolean = false;
 
     protected var cursorY as Number = 0;
 
-    function initialize(siteName as String) {
+    function initialize(siteName as String, connectionProblem as Boolean) {
         View.initialize();
 
         self.siteName = siteName;
+        self.connectionProblem = connectionProblem;
     }
 
     // Load your resources here
@@ -55,6 +57,11 @@ class BaseWeatherView extends WatchUi.View {
 
         var screenWidth = dc.getWidth();
         var screenHeight = dc.getHeight();
+
+        if (connectionProblem) {
+            var connectionProblemIcon = WatchUi.loadResource(Rez.Drawables.ConnectionProblemIcon) as BitmapReference;
+            dc.drawBitmap(screenWidth / 2 - 10, 2 * VERTICAL_SPACE, connectionProblemIcon);
+        }
 
         cursorY = screenHeight / 10;
         dc.drawText(screenWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
