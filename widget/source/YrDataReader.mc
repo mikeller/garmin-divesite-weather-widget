@@ -1,9 +1,16 @@
 import Toybox.System;
 import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.Application;
+import Toybox.Application.Storage;
+import Toybox.Time;
+import Toybox.Time.Gregorian;
 
 class YrDataReader {
-    protected var url as String = "https://garmin-divesite-weather-widget-service.azurewebsites.net/data";
+    protected const DATA_PATH as String = "data";
+    protected const STATUS_PATH as String = "status";
+
+    protected var baseUrl as String = "https://garmin-divesite-weather-widget-service.azurewebsites.net/";
 
     // YR weather data URL (too verbose for the device):
     //var url = "https://api.met.no/weatherapi/locationforecast/2.0/compact.json";
@@ -12,46 +19,91 @@ class YrDataReader {
 
     function initialize(customUrl as String?) {
         if (customUrl != null) {
-            url = customUrl as String;
+            baseUrl = customUrl as String;
         }
     }
 
-    function onReceive(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
-        System.println("Response: " + responseCode);
-
-        if (responseCode >= 200 && responseCode < 300 && data != null) {
-            System.println("length: " + data.toString().length());
-
-            var properties = data["properties"] as Dictionary<String, Dictionary>;
-            System.println("Expires: " +  (properties["meta"] as Dictionary<String, Dictionary>)["expires"]);
+    function tryGetCachedData(latitude as Float, longitude as Float, ignoreExpiry as Boolean) as Array<Dictionary>? {
+        var data = Storage.getValue(locationToString(latitude, longitude));
+        if (data != null) {
+            var properties = (data as Dictionary<String, Dictionary>)["properties"] as Dictionary<String, Dictionary>;
 
             var timeseries = properties["timeseries"] as Array<Dictionary>;
+            
+            if (ignoreExpiry) {
+                return timeseries;
+            }
 
-            (context["callback"] as Method).invoke(timeseries);
-        } else {
-            //TODO: Show error page
+            var expires = IsoDateHandler.parseIsoDate((properties["meta"] as Dictionary<String, String>)["expires"] as String);
+            if (expires != null && (expires as Moment).greaterThan(Time.now())) {
+                System.println("Cache expires: " + IsoDateHandler.printIsoDate(expires));
+
+                return timeseries;
+            }
         }
+
+        return null;
     }
 
-    function readWeatherData(location as Dictionary<String, Float or String>, callback as Method(weatherData as Array) as Void) as String {
-        var latitudeString = (location["latitude"] as Float).format("%.3f");
-        var longitudeString = (location["longitude"] as Float).format("%.3f");
-        var defaultDisplayName = latitudeString + " " + longitudeString;
+    function getWeatherData(latitude as Float, longitude as Float, callback as Method(weatherData as Array, success as Boolean) as Void) as Void {
+        var cache = tryGetCachedData(latitude, longitude, false);
+        if (cache != null) {
+            callback.invoke(cache as Array<Dictionary>, true);
+
+            return;
+        }
 
         var params = {
-            "lat" => latitudeString,
-            "lon" => longitudeString,
+            "lat" => latitude.format("%.3f"),
+            "lon" => longitude.format("%.3f"),
         };
 
         var options = {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
             :context => {
                 "callback" => callback,
+                "latitude" => latitude,
+                "longitude" => longitude,
             },
         };
 
-        Communications.makeWebRequest(url, params, options, method(:onReceive));
+        Communications.makeWebRequest(baseUrl + DATA_PATH, params, options, method(:onReceiveData));
+    }
 
-        return defaultDisplayName;
+    function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
+        System.println("Response: " + responseCode);
+
+        if (responseCode >= 200 && responseCode < 300 && data != null) {
+            var coordinates = (data["geometry"] as Dictionary<String, String or Array>)["coordinates"] as Array<Float>;
+            Storage.setValue(locationToString(coordinates[1], coordinates[0]), data as Dictionary<String, PropertyValueType>);
+
+            var properties = data["properties"] as Dictionary<String, Dictionary>;
+            System.println("Expires: " +  (properties["meta"] as Dictionary<String, Dictionary>)["expires"]);
+
+            var timeseries = properties["timeseries"] as Array<Dictionary>;
+
+            (context["callback"] as Method).invoke(timeseries, true);
+        } else {
+            var cache = tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
+            if (cache != null) {
+                (context["callback"] as Method).invoke(cache as Array<Dictionary>, false);
+            }
+        }
+    }
+
+    function getStatus() as Void {
+        var options = {
+            :method => Communications.HTTP_REQUEST_METHOD_GET,
+        };
+
+        Communications.makeWebRequest(baseUrl + STATUS_PATH, { }, options, method(:onReceiveStatus));
+    }
+
+    function onReceiveStatus(responseCode as Number, data as Dictionary?) as Void {
+        System.println("Status response: " + responseCode);
+    }
+
+    function locationToString(latitude as Float, longitude as Float) as String {
+        return latitude.format("%.3f") + " " + longitude.format("%.3f");
     }
 }

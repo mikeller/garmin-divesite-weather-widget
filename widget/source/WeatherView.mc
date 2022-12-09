@@ -13,15 +13,15 @@ class WeatherView extends BaseWeatherView {
     protected const METRES_PER_SECOND_STRING as String = "m/s";
     protected const DEGREES_C_STRING as String = "°C";
 
-    protected const TODAY_STRING as String = (WatchUi.loadResource(Rez.Strings.TodayName) as String);
+    protected const TODAY_STRING as String = WatchUi.loadResource(Rez.Strings.TodayName) as String;
 
     protected var dateFont as Graphics.FontDefinition = Graphics.FONT_SYSTEM_TINY;
 
     protected var weatherSeries as Array<Dictionary> = [{}] as Array<Dictionary>;
     protected var displayName as String = "";
 
-    function initialize(weatherSeries as Array<Dictionary>, displayName as String) {
-        BaseWeatherView.initialize(displayName);
+    function initialize(weatherSeries as Array<Dictionary>, displayName as String, connectionProblem as Boolean) {
+        BaseWeatherView.initialize(displayName, connectionProblem);
 
         self.weatherSeries = weatherSeries;
         self.displayName = displayName;
@@ -121,7 +121,7 @@ class WeatherView extends BaseWeatherView {
 
         var index = 0;
         var count = 0;
-        while (count < 5) {
+        while (count < 5 && index < weatherSeries.size()) {
             var weatherInfo = weatherSeries[index];
 
             var day = Gregorian.moment({

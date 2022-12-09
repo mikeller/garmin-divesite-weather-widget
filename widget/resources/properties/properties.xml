@@ -1,4 +1,4 @@
 <properties>
     <property id="locations" type="array"></property>
-    <property id="customWeatherApiUrl" type="string"></property>
+    <property id="customUrl" type="string"></property>
 </properties>
