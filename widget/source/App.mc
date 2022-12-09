@@ -3,6 +3,7 @@ import Toybox.Application.Properties;
 import Toybox.Lang;
 import Toybox.WatchUi;
 import Toybox.Time.Gregorian;
+import Toybox.Math;
 
 class App extends Application.AppBase {
     protected var reader as YrDataReader;
@@ -15,7 +16,7 @@ class App extends Application.AppBase {
     function initialize() {
         AppBase.initialize();
 
-        var locations = Properties.getValue("locations") as Array<Dictionary>;
+        var locations = getLocationsProperty();
         if (locations != null) {
             self.locations = locations;
         }
@@ -25,6 +26,37 @@ class App extends Application.AppBase {
             customUrl = null;
         }
         reader = new YrDataReader(customUrl);
+    }
+
+    function getLocationsProperty() as Array<Dictionary>? {
+        var locations = Properties.getValue("locations") as Array<Dictionary>;
+
+        if (locations != null) {
+            var needsUpdate = false;
+            for (var i = 0; i < locations.size(); i++) {
+                var latitude = locations[i]["latitude"] as Float;
+                var latitudeSanitised = Math.round(latitude * 1000) / 1000;
+                if (latitudeSanitised != latitude) {
+                    locations[i]["latitude"] = latitudeSanitised;
+                    needsUpdate = true;
+                }
+
+                var longitude = locations[i]["longitude"] as Float;
+                var longitudeSanitised = Math.round(latitude * 1000) / 1000;
+                if (longitudeSanitised != longitude) {
+                    locations[i]["longitude"] = longitudeSanitised;
+                    needsUpdate = true;
+                }
+            }
+
+            if (needsUpdate) {
+                Properties.setValue("locations", locations as Array<PropertyValueType>);
+
+                System.println("Locations sanitised");
+            }
+        }
+
+        return locations;
     }
 
     // onStart() is called on application start up
