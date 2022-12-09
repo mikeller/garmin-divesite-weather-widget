@@ -4,6 +4,7 @@ import Toybox.Time.Gregorian;
 
 class IsoDateHandler {
     // converts rfc3339 formatted timestamp to Time::Moment (null on error)
+    // from https://forums.garmin.com/developer/connect-iq/f/discussion/2124/parsing-a-date-string-to-moment
     static function parseIsoDate(date as String) as Moment? {
         // 0123456789012345678901234
         // 2011-10-17T13:00:00-07:00
