@@ -35,7 +35,7 @@ class BaseWeatherView extends WatchUi.View {
     function onShow() as Void {
     }
 
-    function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
+    protected function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
         var circleOriginX = screenWidth / 2;
         var circleOriginY = screenHeight / 2;
 

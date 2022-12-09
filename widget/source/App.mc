@@ -36,7 +36,7 @@ class App extends Application.AppBase {
         reader.getStatus();
     }
 
-    function getLocationsProperty() as Array<Dictionary>? {
+    protected function getLocationsProperty() as Array<Dictionary>? {
         var locations = Properties.getValue("locations") as Array<Dictionary>;
 
         if (locations != null) {
@@ -112,7 +112,7 @@ class App extends Application.AppBase {
         switchView();
     }
 
-    function switchView () as Void {
+    protected function switchView () as Void {
         WatchUi.switchToView(currentView, behaviourDelegate, WatchUi.SLIDE_IMMEDIATE);
     }
 
