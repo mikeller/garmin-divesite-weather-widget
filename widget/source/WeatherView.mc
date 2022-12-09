@@ -48,43 +48,48 @@ class WeatherView extends BaseWeatherView {
             nameString = dayInfo.day_of_week + ", " + dayInfo.day;
         }
 
-        var data = weatherInfo["data"] as Dictionary<String, Float or String>;
+        try {
+            var data = weatherInfo["data"] as Dictionary<String, Float or String>;
 
-        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
-        dc.drawText(columnsX[0], cursorY, dateFont, nameString, Graphics.TEXT_JUSTIFY_LEFT);
+            dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
+            dc.drawText(columnsX[0], cursorY, dateFont, nameString, Graphics.TEXT_JUSTIFY_LEFT);
 
-        var windSpeedMs = data["max_wind_speed"];
-        if (windSpeedMs != null) {
-            dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
-            dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(windSpeedMs as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
-        }
-
-        var airTemperatureC = data["max_air_temperature"];
-        if (airTemperatureC != null) {
-            dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
-            dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(airTemperatureC as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
-        }
-
-        var morningWeatherSymbol = data["morning_symbol_code"];
-        if (morningWeatherSymbol != null) {
-            var morningWeatherIcon = loadWeatherIcon(morningWeatherSymbol as String);
-            if (morningWeatherIcon != null) {
-                dc.drawBitmap(columnsX[3], cursorY, morningWeatherIcon);
-            } else {
-                dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
-                dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            var windSpeedMs = data["max_wind_speed"];
+            if (windSpeedMs != null) {
+                dc.setColor(COLOUR_WIND, COLOUR_BACKGROUND);
+                dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(windSpeedMs as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
             }
-        }
 
-        var afternoonWeatherSymbol = data["afternoon_symbol_code"];
-        if (afternoonWeatherSymbol != null) {
-            var afternoonWeatherIcon = loadWeatherIcon(afternoonWeatherSymbol as String);
-            if (afternoonWeatherIcon != null) {
-                dc.drawBitmap(columnsX[4], cursorY, afternoonWeatherIcon);
-            } else {
-                dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
-                dc.drawText(columnsX[4], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            var airTemperatureC = data["max_air_temperature"];
+            if (airTemperatureC != null) {
+                dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
+                dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, "" + Math.round(airTemperatureC as Float).format("%.0f"), Graphics.TEXT_JUSTIFY_RIGHT);
             }
+
+            var morningWeatherSymbol = data["morning_symbol_code"];
+            if (morningWeatherSymbol != null) {
+                var morningWeatherIcon = loadWeatherIcon(morningWeatherSymbol as String);
+                if (morningWeatherIcon != null) {
+                    dc.drawBitmap(columnsX[3], cursorY, morningWeatherIcon);
+                } else {
+                    dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
+                    dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+                }
+            }
+
+            var afternoonWeatherSymbol = data["afternoon_symbol_code"];
+            if (afternoonWeatherSymbol != null) {
+                var afternoonWeatherIcon = loadWeatherIcon(afternoonWeatherSymbol as String);
+                if (afternoonWeatherIcon != null) {
+                    dc.drawBitmap(columnsX[4], cursorY, afternoonWeatherIcon);
+                } else {
+                    dc.setColor(COLOUR_WEATHER, COLOUR_BACKGROUND);
+                    dc.drawText(columnsX[4], cursorY, Graphics.FONT_SYSTEM_TINY, WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+                }
+            }
+
+        } catch (exception instanceof UnexpectedTypeException) {
+            // our input data is bad and cannot be displayed
         }
     }
 
