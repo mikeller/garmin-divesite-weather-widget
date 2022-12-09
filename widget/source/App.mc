@@ -50,7 +50,7 @@ class App extends Application.AppBase {
                 }
 
                 var longitude = locations[i]["longitude"] as Float;
-                var longitudeSanitised = Math.round(latitude * 1000) / 1000;
+                var longitudeSanitised = Math.round(longitude * 1000) / 1000;
                 if (longitudeSanitised != longitude) {
                     locations[i]["longitude"] = longitudeSanitised;
                     needsUpdate = true;
