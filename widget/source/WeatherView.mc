@@ -39,7 +39,7 @@ class WeatherView extends BaseWeatherView {
         BaseWeatherView.onShow();
     }
 
-    function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>) as Void {
+    protected function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>) as Void {
         var nameString;
         if (day instanceof String) {
             nameString = day;
@@ -168,7 +168,7 @@ class WeatherView extends BaseWeatherView {
     }
 
     // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
-    function loadWeatherIcon(name as String) as BitmapResource? {
+    protected function loadWeatherIcon(name as String) as BitmapResource? {
         var weatherIcon;
         switch (name) {
         case "clearsky_day":
