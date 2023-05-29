@@ -1,10 +1,7 @@
-import Toybox.System;
-import Toybox.Communications;
 import Toybox.Lang;
+import Toybox.System;
 import Toybox.Application;
-import Toybox.Application.Storage;
-import Toybox.Time;
-import Toybox.Time.Gregorian;
+import Toybox.Communications;
 
 class YrDataReader {
     protected const DATA_PATH as String = "data";
@@ -19,38 +16,15 @@ class YrDataReader {
     // YR status URL:
     //var url = "https://api.met.no/weatherapi/locationforecast/2.0/status.json";
 
-    function initialize(customUrl as String?) {
-        if (customUrl != null) {
+    function initialize() {
+        var customUrl = WeatherAppProperties.getCustomUrl();
+        if (!"".equals(customUrl)) {
             baseUrl = customUrl as String;
         }
     }
 
-    protected function tryGetCachedData(latitude as Float, longitude as Float, ignoreExpiry as Boolean) as Array<Dictionary>? {
-        var data = Storage.getValue(locationToString(latitude, longitude));
-        if (data != null) {
-            try {
-                var properties = (data as Dictionary<String, Dictionary>)["properties"] as Dictionary<String, Dictionary>;
-
-                var timeseries = properties["timeseries"] as Array<Dictionary>;
-            
-                if (ignoreExpiry) {
-                    return timeseries;
-                }
-
-                var expires = IsoDateHandler.parseIsoDate((properties["meta"] as Dictionary<String, String>)["expires"] as String);
-                if (expires != null && (expires as Moment).greaterThan(Time.now())) {
-                    return timeseries;
-                }
-            } catch (exception instanceof UnexpectedTypeException) {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
     function getWeatherData(latitude as Float, longitude as Float, callback as Method(weatherData as Array, success as Boolean) as Void) as Void {
-        var cache = tryGetCachedData(latitude, longitude, false);
+        var cache = YrDataCache.tryGetCachedData(latitude, longitude, false);
         if (cache != null) {
             callback.invoke(cache as Array<Dictionary>, true);
 
@@ -59,7 +33,7 @@ class YrDataReader {
 
         var cachedDataShown = false;
         if (connectionProblem) {
-            cache = tryGetCachedData(latitude, longitude, true);
+            cache = YrDataCache.tryGetCachedData(latitude, longitude, true);
             if (cache != null) {
                 callback.invoke(cache as Array<Dictionary>, false);
 
@@ -95,7 +69,7 @@ class YrDataReader {
                 var coordinates = (data["geometry"] as Dictionary<String, String or Array>)["coordinates"] as Array<Float>;
                 var timeseries = (data["properties"] as Dictionary<String, Dictionary>)["timeseries"] as Array<Dictionary>;
 
-                Storage.setValue(locationToString(coordinates[1], coordinates[0]), data as Dictionary<String, PropertyValueType>);
+                YrDataCache.setCachedData(coordinates[1], coordinates[0], data as Dictionary<String, PropertyValueType>);
 
                 (context["callback"] as Method).invoke(timeseries, true);
 
@@ -108,7 +82,7 @@ class YrDataReader {
         }
 
         if (!done && !(context["cachedDataShown"] as Boolean)) {
-            var cache = tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
+            var cache = YrDataCache.tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
             if (cache != null) {
                 (context["callback"] as Method).invoke(cache as Array<Dictionary>, false);
             }
@@ -132,9 +106,5 @@ class YrDataReader {
             connectionProblem = true;
         }
 
-    }
-
-    function locationToString(latitude as Float, longitude as Float) as String {
-        return latitude.format("%.3f") + " " + longitude.format("%.3f");
     }
 }

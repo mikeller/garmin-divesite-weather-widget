@@ -24,15 +24,8 @@ class BaseWeatherView extends WatchUi.View {
         self.connectionProblem = connectionProblem;
     }
 
-    // Load your resources here
     function onLayout(dc as Dc) as Void {
         setLayout(Rez.Layouts.MainLayout(dc));
-    }
-
-    // Called when this View is brought to the foreground. Restore
-    // the state of this View and prepare it to be shown. This includes
-    // loading resources into memory.
-    function onShow() as Void {
     }
 
     protected function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
@@ -69,11 +62,5 @@ class BaseWeatherView extends WatchUi.View {
         dc.setPenWidth(LINE_WIDTH);
         dc.drawLine(0, cursorY, screenWidth, cursorY);
         cursorY += LINE_WIDTH + VERTICAL_SPACE;
-    }
-
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
-    function onHide() as Void {
     }
 }
