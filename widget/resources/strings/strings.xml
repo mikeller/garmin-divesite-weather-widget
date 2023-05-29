@@ -11,5 +11,5 @@
     <string id="CustomUrlTitle">Custom Server URL</string>
 
     <string id="TodayName">Today</string>
-    <string id="NoLocations">No locations!</string>
+    <string id="NoLocations" scope="glance">No locations!</string>
 </strings>

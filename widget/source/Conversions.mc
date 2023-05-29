@@ -2,7 +2,8 @@ import Toybox.Lang;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
 
-class IsoDateHandler {
+(:glance)
+class Conversions {
     // converts rfc3339 formatted timestamp to Time::Moment (null on error)
     // from https://forums.garmin.com/developer/connect-iq/f/discussion/2124/parsing-a-date-string-to-moment
     static function parseIsoDate(date as String) as Moment? {
@@ -63,7 +64,7 @@ class IsoDateHandler {
     }
 
     // Unfortunately this is not the inverse of parseIsoDate, as Moment does not keep track of the timezone
-    static function printIsoDate(date as Moment) as String {
+    static function dateToIsoString(date as Moment) as String {
         var dateInfo = Gregorian.info(date as Moment, Time.FORMAT_SHORT);
         return Lang.format("$1$-$2$-$3$T$4$:$5$:$6$-00:00", [
             dateInfo.year.format("%04d"),
@@ -73,5 +74,9 @@ class IsoDateHandler {
             dateInfo.min.format("%02d"),
             dateInfo.sec.format("%02d"),
         ]);
+    }
+
+    static function locationToString(latitude as Float, longitude as Float) as String {
+        return latitude.format("%.3f") + " " + longitude.format("%.3f");
     }
 }

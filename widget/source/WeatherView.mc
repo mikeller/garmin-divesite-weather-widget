@@ -27,16 +27,8 @@ class WeatherView extends BaseWeatherView {
         self.displayName = displayName;
     }
 
-    // Load your resources here
     function onLayout(dc as Dc) as Void {
         BaseWeatherView.onLayout(dc);
-    }
-
-    // Called when this View is brought to the foreground. Restore
-    // the state of this View and prepare it to be shown. This includes
-    // loading resources into memory.
-    function onShow() as Void {
-        BaseWeatherView.onShow();
     }
 
     protected function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>) as Void {
@@ -159,12 +151,6 @@ class WeatherView extends BaseWeatherView {
         dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
         dc.setColor(COLOUR_TEMPERATURE, COLOUR_BACKGROUND);
         dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
-    }
-
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
-    function onHide() as Void {
     }
 
     // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
