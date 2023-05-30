@@ -18,8 +18,8 @@ class YrDataReader {
 
     function initialize() {
         var customUrl = WeatherAppProperties.getCustomUrl();
-        if (!"".equals(customUrl)) {
-            baseUrl = customUrl as String;
+        if (customUrl != null) {
+            baseUrl = customUrl;
         }
     }
 
