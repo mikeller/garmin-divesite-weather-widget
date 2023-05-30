@@ -1,5 +1,5 @@
 <strings>
-    <string id="AppName">Divesite Weather</string>
+    <string id="AppName" scope="glance">Divesite Weather</string>
 
     <string id="LocationsTitle">Locations</string>
     <string id="LocationDisplayNameTitle">Display name</string>
@@ -10,6 +10,9 @@
     <string id="LongitudeRangeError">Longitude must be between -180 and 180</string>
     <string id="CustomUrlTitle">Custom Server URL</string>
 
-    <string id="TodayName">Today</string>
-    <string id="NoLocations" scope="glance">No locations!</string>
+    <string id="NoLocations">No locations!</string>
+
+    <string id="TodayName" scope="glance">Today</string>
+    <string id="MetresPerSecond" scope="glance">m/s</string>
+    <string id="DegreesCelsius" scope="glance">°C</string>
 </strings>

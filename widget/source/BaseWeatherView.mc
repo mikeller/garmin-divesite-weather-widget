@@ -5,13 +5,6 @@ import Toybox.Time;
 import Toybox.Time.Gregorian;
 
 class BaseWeatherView extends WatchUi.View {
-    protected const VERTICAL_SPACE as Number = 2;
-    protected const HORIZONTAL_SPACE as Number = 2;
-    protected const LINE_WIDTH as Number = 3;
-
-    protected const COLOUR_BACKGROUND as Number = Graphics.COLOR_BLACK;
-    protected const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;
-
     protected var siteName as String = "";
     protected var connectionProblem as Boolean = false;
 
@@ -45,7 +38,7 @@ class BaseWeatherView extends WatchUi.View {
     }
 
     function onUpdate(dc as Dc) as Void {
-        dc.setColor(COLOUR_FOREGROUND, COLOUR_BACKGROUND);
+        dc.setColor(Constants.COLOUR_FOREGROUND, Constants.COLOUR_BACKGROUND);
         dc.clear();
 
         var screenWidth = dc.getWidth();
@@ -53,14 +46,14 @@ class BaseWeatherView extends WatchUi.View {
 
         if (connectionProblem) {
             var connectionProblemIcon = WatchUi.loadResource(Rez.Drawables.ConnectionProblemIcon) as BitmapReference;
-            dc.drawBitmap(screenWidth / 2 - 10, 2 * VERTICAL_SPACE, connectionProblemIcon);
+            dc.drawBitmap(screenWidth / 2 - 10, 2 * Constants.VERTICAL_SPACE, connectionProblemIcon);
         }
 
         cursorY = screenHeight / 10;
         dc.drawText(screenWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
-        cursorY += dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL) + VERTICAL_SPACE;
-        dc.setPenWidth(LINE_WIDTH);
+        cursorY += dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL) + Constants.VERTICAL_SPACE;
+        dc.setPenWidth(Constants.LINE_WIDTH);
         dc.drawLine(0, cursorY, screenWidth, cursorY);
-        cursorY += LINE_WIDTH + VERTICAL_SPACE;
+        cursorY += Constants.LINE_WIDTH + Constants.VERTICAL_SPACE;
     }
 }

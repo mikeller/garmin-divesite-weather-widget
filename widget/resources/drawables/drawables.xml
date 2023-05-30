@@ -3,20 +3,32 @@
 
     <bitmap id="ConnectionProblemIcon" filename="connection_problem_icon.png" />
 
-    <bitmap id="clearsky_day" filename="weather_icons/clearsky_day.png" />
+    // Core icons (for most areas where diving is happening anyway)
+    <bitmap id="clearsky_day" scope="glance" filename="weather_icons/clearsky_day.png" />
+    <bitmap id="cloudy" scope="glance" filename="weather_icons/cloudy.png" />
+    <bitmap id="fair_day" scope="glance" filename="weather_icons/fair_day.png" />
+    <bitmap id="fog" scope="glance" filename="weather_icons/fog.png" />
+    <bitmap id="heavyrainandthunder" scope="glance" filename="weather_icons/heavyrainandthunder.png" />
+    <bitmap id="heavyrain" scope="glance" filename="weather_icons/heavyrain.png" />
+    <bitmap id="heavyrainshowersandthunder_day" scope="glance" filename="weather_icons/heavyrainshowersandthunder_day.png" />
+    <bitmap id="heavyrainshowers_day" scope="glance" filename="weather_icons/heavyrainshowers_day.png" />
+    <bitmap id="lightrainandthunder" scope="glance" filename="weather_icons/lightrainandthunder.png" />
+    <bitmap id="lightrain" scope="glance" filename="weather_icons/lightrain.png" />
+    <bitmap id="lightrainshowersandthunder_day" scope="glance" filename="weather_icons/lightrainshowersandthunder_day.png" />
+    <bitmap id="lightrainshowers_day" scope="glance" filename="weather_icons/lightrainshowers_day.png" />
+    <bitmap id="partlycloudy_day" scope="glance" filename="weather_icons/partlycloudy_day.png" />
+    <bitmap id="rainandthunder" scope="glance" filename="weather_icons/rainandthunder.png" />
+    <bitmap id="rain" scope="glance" filename="weather_icons/rain.png" />
+    <bitmap id="rainshowersandthunder_day" scope="glance" filename="weather_icons/rainshowersandthunder_day.png" />
+    <bitmap id="rainshowers_day" scope="glance" filename="weather_icons/rainshowers_day.png" />
+
+    // Rest of the icons
     <bitmap id="clearsky_night" filename="weather_icons/clearsky_night.png" />
     <bitmap id="clearsky_polartwilight" filename="weather_icons/clearsky_polartwilight.png" />
-    <bitmap id="cloudy" filename="weather_icons/cloudy.png" />
-    <bitmap id="fair_day" filename="weather_icons/fair_day.png" />
     <bitmap id="fair_night" filename="weather_icons/fair_night.png" />
     <bitmap id="fair_polartwilight" filename="weather_icons/fair_polartwilight.png" />
-    <bitmap id="fog" filename="weather_icons/fog.png" />
-    <bitmap id="heavyrainandthunder" filename="weather_icons/heavyrainandthunder.png" />
-    <bitmap id="heavyrain" filename="weather_icons/heavyrain.png" />
-    <bitmap id="heavyrainshowersandthunder_day" filename="weather_icons/heavyrainshowersandthunder_day.png" />
     <bitmap id="heavyrainshowersandthunder_night" filename="weather_icons/heavyrainshowersandthunder_night.png" />
     <bitmap id="heavyrainshowersandthunder_polartwilight" filename="weather_icons/heavyrainshowersandthunder_polartwilight.png" />
-    <bitmap id="heavyrainshowers_day" filename="weather_icons/heavyrainshowers_day.png" />
     <bitmap id="heavyrainshowers_night" filename="weather_icons/heavyrainshowers_night.png" />
     <bitmap id="heavyrainshowers_polartwilight" filename="weather_icons/heavyrainshowers_polartwilight.png" />
     <bitmap id="heavysleetandthunder" filename="weather_icons/heavysleetandthunder.png" />
@@ -35,12 +47,8 @@
     <bitmap id="heavysnowshowers_day" filename="weather_icons/heavysnowshowers_day.png" />
     <bitmap id="heavysnowshowers_night" filename="weather_icons/heavysnowshowers_night.png" />
     <bitmap id="heavysnowshowers_polartwilight" filename="weather_icons/heavysnowshowers_polartwilight.png" />
-    <bitmap id="lightrainandthunder" filename="weather_icons/lightrainandthunder.png" />
-    <bitmap id="lightrain" filename="weather_icons/lightrain.png" />
-    <bitmap id="lightrainshowersandthunder_day" filename="weather_icons/lightrainshowersandthunder_day.png" />
     <bitmap id="lightrainshowersandthunder_night" filename="weather_icons/lightrainshowersandthunder_night.png" />
     <bitmap id="lightrainshowersandthunder_polartwilight" filename="weather_icons/lightrainshowersandthunder_polartwilight.png" />
-    <bitmap id="lightrainshowers_day" filename="weather_icons/lightrainshowers_day.png" />
     <bitmap id="lightrainshowers_night" filename="weather_icons/lightrainshowers_night.png" />
     <bitmap id="lightrainshowers_polartwilight" filename="weather_icons/lightrainshowers_polartwilight.png" />
     <bitmap id="lightsleetandthunder" filename="weather_icons/lightsleetandthunder.png" />
@@ -59,15 +67,10 @@
     <bitmap id="lightssnowshowersandthunder_day" filename="weather_icons/lightssnowshowersandthunder_day.png" />
     <bitmap id="lightssnowshowersandthunder_night" filename="weather_icons/lightssnowshowersandthunder_night.png" />
     <bitmap id="lightssnowshowersandthunder_polartwilight" filename="weather_icons/lightssnowshowersandthunder_polartwilight.png" />
-    <bitmap id="partlycloudy_day" filename="weather_icons/partlycloudy_day.png" />
     <bitmap id="partlycloudy_night" filename="weather_icons/partlycloudy_night.png" />
     <bitmap id="partlycloudy_polartwilight" filename="weather_icons/partlycloudy_polartwilight.png" />
-    <bitmap id="rainandthunder" filename="weather_icons/rainandthunder.png" />
-    <bitmap id="rain" filename="weather_icons/rain.png" />
-    <bitmap id="rainshowersandthunder_day" filename="weather_icons/rainshowersandthunder_day.png" />
     <bitmap id="rainshowersandthunder_night" filename="weather_icons/rainshowersandthunder_night.png" />
     <bitmap id="rainshowersandthunder_polartwilight" filename="weather_icons/rainshowersandthunder_polartwilight.png" />
-    <bitmap id="rainshowers_day" filename="weather_icons/rainshowers_day.png" />
     <bitmap id="rainshowers_night" filename="weather_icons/rainshowers_night.png" />
     <bitmap id="rainshowers_polartwilight" filename="weather_icons/rainshowers_polartwilight.png" />
     <bitmap id="sleetandthunder" filename="weather_icons/sleetandthunder.png" />

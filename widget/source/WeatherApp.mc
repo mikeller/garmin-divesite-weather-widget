@@ -17,7 +17,7 @@ class WeatherApp extends Application.AppBase {
     }
 
     function getGlanceView() as Array<GlanceView>? {
-        return [new WeatherGlanceView(locations != 0 ? locations[0] : null)] as Array<GlanceView>;
+        return [new WeatherGlanceView(locations.size() > 0 ? locations[0] : null)] as Array<GlanceView>;
     }
 
     (:typecheck(disableGlanceCheck))
