@@ -31,10 +31,11 @@ class WeatherApp extends Application.AppBase {
 
     (:typecheck(disableGlanceCheck))
     function onStart(state as Dictionary?) as Void {
-        System.println("App started at " + Conversions.dateToIsoString(Time.now()));
+        Utils.log("App started.");
     }
 
     function onStop(state as Dictionary?) as Void {
+        Utils.log("App Stopped.");
     }
 }
 

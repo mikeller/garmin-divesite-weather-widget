@@ -71,7 +71,8 @@ class WeatherView extends BaseWeatherView {
             }
 
         } catch (exception instanceof UnexpectedTypeException) {
-            // our input data is bad and cannot be displayed
+            Utils.log("Data format problem: " + exception.getErrorMessage());
+            exception.printStackTrace();
         }
     }
 

@@ -1,5 +1,4 @@
 import Toybox.Lang;
-import Toybox.System;
 import Toybox.Application;
 import Toybox.Communications;
 
@@ -57,11 +56,11 @@ class YrDataReader {
         };
 
         Communications.makeWebRequest(baseUrl + DATA_PATH, params, options, method(:onReceiveData));
+
+        Utils.log("Sent request for: " + Utils.locationToString(latitude, longitude));
     }
 
     function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
-        System.println("Response: " + responseCode);
-
         var done = false;
         if (responseCode >= 200 && responseCode < 300 && data != null) {
             connectionProblem = false;
@@ -69,15 +68,21 @@ class YrDataReader {
                 var coordinates = (data["geometry"] as Dictionary<String, String or Array>)["coordinates"] as Array<Float>;
                 var timeseries = (data["properties"] as Dictionary<String, Dictionary>)["timeseries"] as Array<Dictionary>;
 
+                Utils.log("Received data for: " + Utils.locationToString(coordinates[1], coordinates[0]));
+
+
                 YrDataCache.setCachedData(coordinates[1], coordinates[0], data as Dictionary<String, PropertyValueType>);
 
                 (context["callback"] as Method).invoke(timeseries, true);
 
                 done = true;
             } catch (exception instanceof UnexpectedTypeException) {
-                // the data we received is bad, fall through
+                Utils.log("Received data format problem: " + exception.getErrorMessage());
+                exception.printStackTrace();
             }
         } else {
+            Utils.log("Received non-ok response: " + responseCode);
+
             connectionProblem = true;
         }
 
@@ -98,7 +103,7 @@ class YrDataReader {
     }
 
     function onReceiveStatus(responseCode as Number, data as Dictionary?) as Void {
-        System.println("Status response: " + responseCode);
+        Utils.log("Status response: " + responseCode);
 
         if (responseCode >= 200 && responseCode < 300 && data != null) {
             connectionProblem = false;
