@@ -67,6 +67,20 @@ class WeatherViewManager {
             }
 
             reader.getWeatherData(latitude, longitude, method(:onWeatherDataReady));
+
+            refreshWeatherCache(currentLocationIndex);
+        }
+    }
+
+    private function refreshWeatherCache(excludedIndex as Number) as Void {
+        for (var i = 0; i < locations.size(); i++) {
+            if (i != excludedIndex) {
+                var location = locations[i] as Dictionary<String, Float or String>;
+                var latitude = location["latitude"] as Float;
+                var longitude = location["longitude"] as Float;
+
+                reader.getWeatherData(latitude, longitude, null);
+            }
         }
     }
 
