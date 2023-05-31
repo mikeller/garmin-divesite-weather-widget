@@ -29,7 +29,7 @@ class WeatherAppProperties {
             if (needsUpdate) {
                 Properties.setValue("locations", locations as Array<PropertyValueType>);
 
-                System.println("Locations sanitised");
+                Utils.log("Locations sanitised");
             }
         }
 

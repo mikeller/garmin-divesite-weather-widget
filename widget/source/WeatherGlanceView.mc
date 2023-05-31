@@ -27,7 +27,7 @@ class WeatherGlanceView extends WatchUi.GlanceView {
 
                 var displayName = location["displayName"] as String;
                 if ("".equals(displayName)) {
-                    glanceTitle = Conversions.locationToString(latitude, longitude);
+                    glanceTitle = Utils.locationToString(latitude, longitude);
                 } else {
                     glanceTitle = displayName;
                 }
@@ -55,8 +55,8 @@ class WeatherGlanceView extends WatchUi.GlanceView {
                         if (day.compare(today) >= 0) {
                             var data = weatherInfo["data"] as Dictionary<String, Float or String>;
                             
-                            windSpeedMs = data["max_wind_speed"] as Float?;
-                            airTemperatureC = data["max_air_temperature"] as Float?;
+                            windSpeedMs = data["max_wind_speed"];
+                            airTemperatureC = data["max_air_temperature"];
                             morningWeatherSymbol = data["morning_symbol_code"];
                             afternoonWeatherSymbol = data["afternoon_symbol_code"];
 
@@ -68,7 +68,8 @@ class WeatherGlanceView extends WatchUi.GlanceView {
                 }
             }
         } catch (exception instanceof UnexpectedTypeException) {
-            // our input data is bad and cannot be displayed
+            Utils.log("Data format problem: " + exception.getErrorMessage());
+            exception.printStackTrace();
         }
     }
 

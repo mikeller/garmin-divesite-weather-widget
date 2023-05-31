@@ -31,6 +31,8 @@ class WeatherViewManager {
     }
 
     function getInitialView() as Array<Views or InputDelegates>? {
+        Utils.log("Initial view loaded.");
+
         return [ currentView, behaviourDelegate ] as Array<Views or InputDelegates>;
     }
 
@@ -53,7 +55,7 @@ class WeatherViewManager {
 
             var displayName = location["displayName"] as String;
             if ("".equals(displayName)) {
-                currentPageTitle = Conversions.locationToString(latitude, longitude);
+                currentPageTitle = Utils.locationToString(latitude, longitude);
             } else {
                 currentPageTitle = displayName;
             }
