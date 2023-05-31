@@ -9,7 +9,7 @@ class WeatherView extends BaseWeatherView {
 
     private var weatherSeries as Array<Dictionary> = [{}] as Array<Dictionary>;
     private var displayName as String = "";
-
+        
     function initialize(weatherSeries as Array<Dictionary>, displayName as String, connectionProblem as Boolean) {
         BaseWeatherView.initialize(displayName, connectionProblem);
 
@@ -17,11 +17,7 @@ class WeatherView extends BaseWeatherView {
         self.displayName = displayName;
     }
 
-    function onLayout(dc as Dc) as Void {
-        BaseWeatherView.onLayout(dc);
-    }
-
-    protected function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>) as Void {
+    protected function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>, isFirstLine as Boolean) as Void {
         var nameString;
         if (day instanceof String) {
             nameString = day;
@@ -49,30 +45,33 @@ class WeatherView extends BaseWeatherView {
             }
 
             var morningWeatherSymbol = data["morning_symbol_code"];
-            if (morningWeatherSymbol != null) {
-                var morningWeatherIcon = WeatherIcons.loadIcon(morningWeatherSymbol as String);
-                if (morningWeatherIcon != null) {
-                    dc.drawBitmap(columnsX[3], cursorY, morningWeatherIcon);
-                } else {
-                    dc.setColor(Constants.COLOUR_WEATHER, Constants.COLOUR_BACKGROUND);
-                    dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
-                }
-            }
-
             var afternoonWeatherSymbol = data["afternoon_symbol_code"];
-            if (afternoonWeatherSymbol != null) {
-                var afternoonWeatherIcon = WeatherIcons.loadIcon(afternoonWeatherSymbol as String);
-                if (afternoonWeatherIcon != null) {
-                    dc.drawBitmap(columnsX[4], cursorY, afternoonWeatherIcon);
-                } else {
-                    dc.setColor(Constants.COLOUR_WEATHER, Constants.COLOUR_BACKGROUND);
-                    dc.drawText(columnsX[4], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
-                }
-            }
-
+            drawSymbols(dc, morningWeatherSymbol, afternoonWeatherSymbol, columnsX[3], columnsX[4], cursorY, isFirstLine);
         } catch (exception instanceof UnexpectedTypeException) {
             Utils.log("Data format problem: " + exception.getErrorMessage());
             exception.printStackTrace();
+        }
+    }
+
+    private function drawSymbolsInternal(dc as Dc, morningWeatherSymbol as String?, afternoonWeatherSymbol as String?, morningX as Number, afternoonX as Number, cursorY as Number) as Void {
+        if (morningWeatherSymbol != null) {
+            var morningWeatherIcon = WeatherIcons.loadIcon(morningWeatherSymbol as String);
+            if (morningWeatherIcon != null) {
+                dc.drawBitmap(morningX, cursorY, morningWeatherIcon);
+            } else {
+                dc.setColor(Constants.COLOUR_WEATHER, Constants.COLOUR_BACKGROUND);
+                dc.drawText(morningX, cursorY, Graphics.FONT_SYSTEM_TINY, Constants.WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            }
+        }
+
+        if (afternoonWeatherSymbol != null) {
+            var afternoonWeatherIcon = WeatherIcons.loadIcon(afternoonWeatherSymbol as String);
+            if (afternoonWeatherIcon != null) {
+                dc.drawBitmap(afternoonX, cursorY, afternoonWeatherIcon);
+            } else {
+                dc.setColor(Constants.COLOUR_WEATHER, Constants.COLOUR_BACKGROUND);
+                dc.drawText(afternoonX, cursorY, Graphics.FONT_SYSTEM_TINY, Constants.WEATHER_SYMBOL_UNKNOWN_STRING, Graphics.TEXT_JUSTIFY_LEFT);
+            }
         }
     }
 
@@ -88,16 +87,16 @@ class WeatherView extends BaseWeatherView {
         }
 
         var nameColumnX = calculateViewPortBoundaryX(cursorY, lineHeight, screenWidth, screenHeight, false);
-        var nameColumnXBottom = calculateViewPortBoundaryX(cursorY + 4 * (lineHeight + Constants.VERTICAL_SPACE), lineHeight, screenWidth, screenHeight, false);
+        var nameColumnXBottom = calculateViewPortBoundaryX(cursorY + (Constants.DAYS_TO_SHOW - 1) * (lineHeight + Constants.VERTICAL_SPACE), lineHeight, screenWidth, screenHeight, false);
         if (nameColumnXBottom > nameColumnX) {
             nameColumnX = nameColumnXBottom;
         }
 
         var windColumnX = nameColumnX + dc.getTextWidthInPixels("Mon, 22", dateFont) + Constants.HORIZONTAL_SPACE + dc.getTextWidthInPixels("10", Graphics.FONT_SYSTEM_TINY);
         var temperatureColumnX = windColumnX + Constants.HORIZONTAL_SPACE + dc.getTextWidthInPixels("-10", Graphics.FONT_SYSTEM_TINY);
-        var morningWeatherColumnX = temperatureColumnX + 2 * Constants.HORIZONTAL_SPACE;
+        var morningWeatherColumnX = temperatureColumnX + 2 * Constants.HORIZONTAL_SPACE_SYMBOLS;
         // Symbols are square, so their width is equal to lineHeight
-        var afternoonWeatherColumnX = morningWeatherColumnX + Constants.HORIZONTAL_SPACE + lineHeight;
+        var afternoonWeatherColumnX = morningWeatherColumnX + Constants.HORIZONTAL_SPACE_SYMBOLS + lineHeight;
 
         var columnsX = [
             nameColumnX,
@@ -109,7 +108,7 @@ class WeatherView extends BaseWeatherView {
 
         var index = 0;
         var count = 0;
-        while (count < 5 && index < weatherSeries.size()) {
+        while (count < Constants.DAYS_TO_SHOW && index < weatherSeries.size()) {
             var weatherInfo = weatherSeries[index];
 
             var day = Gregorian.moment({
@@ -129,7 +128,7 @@ class WeatherView extends BaseWeatherView {
                 if (day.compare(today) == 0) {
                     day = Constants.TODAY_STRING;
                 }
-                drawDayForecast(dc, columnsX, cursorY, day, weatherInfo as Dictionary<String, String or Dictionary>);
+                drawDayForecast(dc, columnsX, cursorY, day, weatherInfo as Dictionary<String, String or Dictionary>, count == 0);
                 cursorY += lineHeight + Constants.VERTICAL_SPACE;
 
                 count++;
@@ -142,5 +141,62 @@ class WeatherView extends BaseWeatherView {
         dc.drawText(columnsX[1], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
         dc.setColor(Constants.COLOUR_TEMPERATURE, Constants.COLOUR_BACKGROUND);
         dc.drawText(columnsX[2], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+    }
+
+   (:roundScreen)
+    private function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
+        var circleOriginX = screenWidth / 2;
+        var circleOriginY = screenHeight / 2;
+
+        if (y > circleOriginY) {
+            y += fontHeight;
+        }
+        var normalisedY = 1.0f * (circleOriginY - y) / circleOriginY;     
+        var angle = Math.asin(normalisedY);
+        if (rightSide) {
+            angle += Math.PI;
+        }
+        var normalisedX = Math.cos(angle);
+        return Math.round(circleOriginX - (normalisedX * circleOriginX));
+    }
+
+    (:semioctagonalScreen)
+    private function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {        
+        if (y > screenHeight / 2) {
+            y += fontHeight;
+        }
+
+        var x;
+        if (y < Constants.SEMIOCTAGONAL_CORNER_HEIGHT) {
+            x = Constants.SEMIOCTAGONAL_CORNER_HEIGHT - y;
+        } else if (y < screenHeight - Constants.SEMIOCTAGONAL_CORNER_HEIGHT) {
+            x = 0;
+        } else {
+            x = y - (screenHeight - Constants.SEMIOCTAGONAL_CORNER_HEIGHT);
+        }
+
+        if (rightSide) {
+            x = screenWidth - x;
+        }
+
+        return x;
+    }
+
+    (:roundScreen)
+    private function drawSymbols(dc as Dc, morningWeatherSymbol as String?, afternoonWeatherSymbol as String?, morningX as Number, afternoonX as Number, cursorY as Number, isFirstLine as Boolean) as Void {
+        drawSymbolsInternal(dc, morningWeatherSymbol, afternoonWeatherSymbol, morningX, afternoonX, cursorY);
+    }
+
+    (:semioctagonalScreen)
+    private function drawSymbols(dc as Dc, morningWeatherSymbol as String?, afternoonWeatherSymbol as String?, morningX as Number, afternoonX as Number, cursorY as Number, isFirstLine as Boolean) as Void {
+        if (isFirstLine) {
+            var subWindowMorningX = Constants.SUB_WINDOW_X + Constants.HORIZONTAL_SPACE_SYMBOLS;
+            var subWindowAfternoonX = subWindowMorningX + afternoonX - morningX;
+            var lineHeight = dc.getFontHeight(Graphics.FONT_SYSTEM_TINY);
+            var subWindowY = Constants.SUB_WINDOW_Y - lineHeight / 2 - Constants.VERTICAL_SPACE;
+            drawSymbolsInternal(dc, morningWeatherSymbol, afternoonWeatherSymbol, subWindowMorningX, subWindowAfternoonX, subWindowY);
+        } else {
+            drawSymbolsInternal(dc, morningWeatherSymbol, afternoonWeatherSymbol, morningX, afternoonX, cursorY);
+        }
     }
 }

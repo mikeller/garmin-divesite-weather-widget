@@ -17,26 +17,6 @@ class BaseWeatherView extends WatchUi.View {
         self.connectionProblem = connectionProblem;
     }
 
-    function onLayout(dc as Dc) as Void {
-        setLayout(Rez.Layouts.MainLayout(dc));
-    }
-
-    protected function calculateViewPortBoundaryX(y as Number, fontHeight as Number, screenWidth as Number, screenHeight as Number, rightSide as Boolean) as Number {
-        var circleOriginX = screenWidth / 2;
-        var circleOriginY = screenHeight / 2;
-
-        if (y > circleOriginY) {
-            y += fontHeight;
-        }
-        var normalisedY = 1.0f * (circleOriginY - y) / circleOriginY;     
-        var angle = Math.asin(normalisedY);
-        if (rightSide) {
-            angle += Math.PI;
-        }
-        var normalisedX = Math.cos(angle);
-        return Math.round(circleOriginX - (normalisedX * circleOriginX));
-    }
-
     function onUpdate(dc as Dc) as Void {
         dc.setColor(Constants.COLOUR_FOREGROUND, Constants.COLOUR_BACKGROUND);
         dc.clear();
@@ -49,11 +29,23 @@ class BaseWeatherView extends WatchUi.View {
             dc.drawBitmap(screenWidth / 2 - 10, 2 * Constants.VERTICAL_SPACE, connectionProblemIcon);
         }
 
+        var titleWidth = getTitleWidth(dc);
+
         cursorY = screenHeight / 10;
-        dc.drawText(screenWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.drawText(titleWidth / 2, cursorY, Graphics.FONT_SYSTEM_SMALL, siteName, Graphics.TEXT_JUSTIFY_CENTER);
         cursorY += dc.getFontHeight(Graphics.FONT_SYSTEM_SMALL) + Constants.VERTICAL_SPACE;
         dc.setPenWidth(Constants.LINE_WIDTH);
-        dc.drawLine(0, cursorY, screenWidth, cursorY);
+        dc.drawLine(0, cursorY, titleWidth, cursorY);
         cursorY += Constants.LINE_WIDTH + Constants.VERTICAL_SPACE;
+    }
+
+    (:roundScreen)
+    private function getTitleWidth(dc as Dc) as Number {
+        return dc.getWidth();
+    }
+
+    (:semioctagonalScreen)
+    private function getTitleWidth(dc as Dc) as Number {
+        return 112;
     }
 }
