@@ -22,19 +22,21 @@ class YrDataReader {
         }
     }
 
-    function getWeatherData(latitude as Float, longitude as Float, callback as Method(weatherData as Array<Dictionary>?, success as Boolean) as Void) as Void {
+    function getWeatherData(latitude as Float, longitude as Float, callback as (Method(weatherData as Array<Dictionary>?, success as Boolean) as Void)?) as Void {
         var cache = YrDataCache.tryGetCachedData(latitude, longitude, false);
         if (cache != null) {
-            callback.invoke(cache as Array<Dictionary>, false);
+            if (callback != null) {
+                callback.invoke(cache as Array<Dictionary>, false);
+            }
 
             return;
         }
 
-        var cachedDataShown = false;
-        if (connectionProblem) {
+        var staleDataShown = false;
+        if (connectionProblem && callback != null) {
             cache = YrDataCache.tryGetCachedData(latitude, longitude, true);
             if (cache != null) {
-                cachedDataShown = true;
+                staleDataShown = true;
             }
 
             callback.invoke(cache , true);
@@ -51,7 +53,7 @@ class YrDataReader {
                 "callback" => callback,
                 "latitude" => latitude,
                 "longitude" => longitude,
-                "cachedDataShown" => cachedDataShown,
+                "staleDataShown" => staleDataShown,
             },
         };
 
@@ -60,7 +62,8 @@ class YrDataReader {
         Utils.log("Sent request for: " + Utils.locationToString(latitude, longitude));
     }
 
-    function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method>) as Void {
+    function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Null>) as Void {
+        var callback = context["callback"];
         var done = false;
         if (responseCode >= 200 && responseCode < 300 && data != null) {
             connectionProblem = false;
@@ -73,7 +76,9 @@ class YrDataReader {
 
                 YrDataCache.setCachedData(coordinates[1], coordinates[0], data as Dictionary<String, PropertyValueType>);
 
-                (context["callback"] as Method).invoke(timeseries, false);
+                if (callback != null) {
+                    (callback as Method).invoke(timeseries, false);
+                }
 
                 done = true;
             } catch (exception instanceof UnexpectedTypeException) {
@@ -86,9 +91,9 @@ class YrDataReader {
             connectionProblem = true;
         }
 
-        if (!done && !(context["cachedDataShown"] as Boolean)) {
+        if (!done && callback != null && !(context["staleDataShown"] as Boolean)) {
             var cache = YrDataCache.tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
-            (context["callback"] as Method).invoke(cache, connectionProblem);
+            (callback as Method).invoke(cache, connectionProblem);
         }
     }
 

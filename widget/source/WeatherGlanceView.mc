@@ -108,7 +108,7 @@ class WeatherGlanceView extends WatchUi.GlanceView {
         }
 
         // Symbols are square, so their width is equal to lineHeight
-        secondLineX = secondLineX + lineHeight + 2 * Constants.HORIZONTAL_SPACE;
+        secondLineX = secondLineX + lineHeight + 2 * Constants.HORIZONTAL_SPACE_SYMBOLS;
         if (afternoonWeatherSymbol != null) {
             var afternoonWeatherIcon = CoreWeatherIcons.loadIcon(afternoonWeatherSymbol);
             if (afternoonWeatherIcon != null) {
