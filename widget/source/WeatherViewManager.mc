@@ -70,8 +70,12 @@ class WeatherViewManager {
         }
     }
 
-    function onWeatherDataReady(weatherSeries as Array<Dictionary>, success as Boolean) as Void {
-        currentView = new WeatherView(weatherSeries, currentPageTitle, !success);
+    function onWeatherDataReady(weatherSeries as Array<Dictionary>?, connectionProblem as Boolean) as Void {
+        if (weatherSeries != null) {
+            currentView = new WeatherView(weatherSeries, currentPageTitle, connectionProblem);
+        } else {
+            currentView = new BaseWeatherView(currentPageTitle, connectionProblem);
+        }
 
         switchView();
     }
