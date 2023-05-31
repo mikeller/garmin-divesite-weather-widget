@@ -22,10 +22,10 @@ class YrDataReader {
         }
     }
 
-    function getWeatherData(latitude as Float, longitude as Float, callback as Method(weatherData as Array, success as Boolean) as Void) as Void {
+    function getWeatherData(latitude as Float, longitude as Float, callback as Method(weatherData as Array<Dictionary>?, success as Boolean) as Void) as Void {
         var cache = YrDataCache.tryGetCachedData(latitude, longitude, false);
         if (cache != null) {
-            callback.invoke(cache as Array<Dictionary>, true);
+            callback.invoke(cache as Array<Dictionary>, false);
 
             return;
         }
@@ -34,10 +34,10 @@ class YrDataReader {
         if (connectionProblem) {
             cache = YrDataCache.tryGetCachedData(latitude, longitude, true);
             if (cache != null) {
-                callback.invoke(cache as Array<Dictionary>, false);
-
                 cachedDataShown = true;
             }
+
+            callback.invoke(cache , true);
         }
 
         var params = {
@@ -73,7 +73,7 @@ class YrDataReader {
 
                 YrDataCache.setCachedData(coordinates[1], coordinates[0], data as Dictionary<String, PropertyValueType>);
 
-                (context["callback"] as Method).invoke(timeseries, true);
+                (context["callback"] as Method).invoke(timeseries, false);
 
                 done = true;
             } catch (exception instanceof UnexpectedTypeException) {
@@ -81,16 +81,14 @@ class YrDataReader {
                 exception.printStackTrace();
             }
         } else {
-            Utils.log("Received non-ok response: " + responseCode);
+            Utils.log("Received data nok: " + responseCode);
 
             connectionProblem = true;
         }
 
         if (!done && !(context["cachedDataShown"] as Boolean)) {
             var cache = YrDataCache.tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
-            if (cache != null) {
-                (context["callback"] as Method).invoke(cache as Array<Dictionary>, false);
-            }
+            (context["callback"] as Method).invoke(cache, connectionProblem);
         }
     }
 
@@ -103,11 +101,12 @@ class YrDataReader {
     }
 
     function onReceiveStatus(responseCode as Number, data as Dictionary?) as Void {
-        Utils.log("Status response: " + responseCode);
-
         if (responseCode >= 200 && responseCode < 300 && data != null) {
+            Utils.log("Received status.");
             connectionProblem = false;
         } else {
+            Utils.log("Received data nok: " + responseCode);
+
             connectionProblem = true;
         }
 
