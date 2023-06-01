@@ -10,8 +10,8 @@ class WeatherView extends BaseWeatherView {
     private var weatherSeries as Array<Dictionary> = [{}] as Array<Dictionary>;
     private var displayName as String = "";
         
-    function initialize(weatherSeries as Array<Dictionary>, displayName as String, connectionProblem as Boolean) {
-        BaseWeatherView.initialize(displayName, connectionProblem);
+    function initialize(weatherSeries as Array<Dictionary>, displayName as String, dataIsStale as Boolean) {
+        BaseWeatherView.initialize(displayName, dataIsStale);
 
         self.weatherSeries = weatherSeries;
         self.displayName = displayName;

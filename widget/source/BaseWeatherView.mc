@@ -6,15 +6,15 @@ import Toybox.Time.Gregorian;
 
 class BaseWeatherView extends WatchUi.View {
     protected var siteName as String = "";
-    protected var connectionProblem as Boolean = false;
+    protected var dataIsStale as Boolean = false;
 
     protected var cursorY as Number = 0;
 
-    function initialize(siteName as String, connectionProblem as Boolean) {
+    function initialize(siteName as String, dataIsStale as Boolean) {
         View.initialize();
 
         self.siteName = siteName;
-        self.connectionProblem = connectionProblem;
+        self.dataIsStale = dataIsStale;
     }
 
     function onUpdate(dc as Dc) as Void {
@@ -24,7 +24,7 @@ class BaseWeatherView extends WatchUi.View {
         var screenWidth = dc.getWidth();
         var screenHeight = dc.getHeight();
 
-        if (connectionProblem) {
+        if (dataIsStale) {
             var connectionProblemIcon = WatchUi.loadResource(Rez.Drawables.ConnectionProblemIcon) as BitmapReference;
             dc.drawBitmap(screenWidth / 2 - 10, 2 * Constants.VERTICAL_SPACE, connectionProblemIcon);
         }

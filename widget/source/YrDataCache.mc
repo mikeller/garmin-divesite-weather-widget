@@ -14,31 +14,34 @@ class YrDataCache {
 
                 var timeseries = properties["timeseries"] as Array<Dictionary>;
             
-                if (ignoreExpiry) {
-                    Utils.log("Cache hit: " + Utils.locationToString(latitude, longitude));
-
-                    return timeseries;
-                }
-
-                var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String;
+                var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String?;
                 var expires = Utils.parseIsoDate(expiresString);
-                if (expires != null && (expires as Moment).greaterThan(Time.now())) {
-                    Utils.log("Cache hit (expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
+                var isStale = expires == null || (expires as Moment).lessThan(Time.now());
+                if (!isStale || ignoreExpiry) {
+                    Utils.log("Cache hit (" + (isStale ? "stale, " : "") + "expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
 
                     return timeseries;
+                } else {
+                    Utils.log("Cache miss (stale data found, expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
+
+                    return null;
                 }
             } catch (exception instanceof UnexpectedTypeException) {
-                Utils.log("Cache data format problem: " + exception.getErrorMessage());
+                Utils.log("Cache data format problem: (exception: " + exception.getErrorMessage() + "): " + Utils.locationToString(latitude, longitude));
                 exception.printStackTrace();
             }
         }
 
-        Utils.log("Cache miss.");
+        Utils.log("Cache miss" + (ignoreExpiry ? " (ignoring expiry)" : "") + ": " + Utils.locationToString(latitude, longitude));
 
         return null;
     }
 
     static function setCachedData(latitude as Float, longitude as Float, data as Dictionary<String, PropertyValueType>) as Void {
+        var properties = (data as Dictionary<String, Dictionary>)["properties"] as Dictionary<String, Dictionary>;
+        var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String?;
+        Utils.log("Cache update (expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
+
         Storage.setValue(Utils.locationToString(latitude, longitude), data);
     }
 }

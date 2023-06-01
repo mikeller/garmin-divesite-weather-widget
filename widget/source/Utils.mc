@@ -7,12 +7,12 @@ import Toybox.Time.Gregorian;
 class Utils {
     // converts rfc3339 formatted timestamp to Time::Moment (null on error)
     // from https://forums.garmin.com/developer/connect-iq/f/discussion/2124/parsing-a-date-string-to-moment
-    static function parseIsoDate(date as String) as Moment? {
+    static function parseIsoDate(date as String?) as Moment? {
         // 0123456789012345678901234
         // 2011-10-17T13:00:00-07:00
         // 2011-10-17T16:30:55.000Z
         // 2011-10-17T16:30:55Z
-        if (date.length() < 20) {
+        if (date == null || (date as String).length() < 20) {
             return null;
         }
 
