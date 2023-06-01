@@ -1,17 +1,23 @@
 import Toybox.Lang;
 import Toybox.WatchUi;
 import Toybox.Time.Gregorian;
+import Toybox.Timer;
 
 class WeatherViewManager {
     private var reader as YrDataReader;
+
     private var behaviourDelegate as WatchUi.BehaviorDelegate;
+
     private var currentView as WatchUi.View;
+    private var currentPageTitle as String = WatchUi.loadResource(Rez.Strings.NoLocations) as String;
 
     private var locations as Array<Dictionary> = [] as Array<Dictionary>;
     private var currentLocationIndex as Number = 0;
 
-    private var currentPageTitle as String = WatchUi.loadResource(Rez.Strings.NoLocations) as String;
     private var started as Boolean = false;
+
+    private var refreshTimer as Timer.Timer = new Timer.Timer();
+    private var delayedRefreshRequested as Boolean = false;
 
     function initialize(locations as Array<Dictionary>) {
         if (locations != null) {
@@ -60,6 +66,8 @@ class WeatherViewManager {
                 currentPageTitle = displayName;
             }
 
+            Utils.log("Loading view: " + currentPageTitle + " (" + latitude + ", " + longitude + ")");
+
             currentView = new BaseWeatherView(currentPageTitle, false);
 
             if (started) {
@@ -71,8 +79,6 @@ class WeatherViewManager {
     }
 
     private function refreshWeatherCache(startIndex as Number) as Void {
-        Utils.log("Refreshing cache.");
-
         for (var counter = 0; counter < locations.size(); counter++) {
             var index = (startIndex + counter) % locations.size();
             var location = getLocation(index);
@@ -87,7 +93,7 @@ class WeatherViewManager {
         return locations[index] as Dictionary<String, Float or String or Boolean>;
     }
 
-    function onWeatherDataReady(weatherSeries as Array<Dictionary>?, handle as Number, dataIsStale as Boolean) as Void {
+    function onWeatherDataReady(weatherSeries as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void {
         if (handle == currentLocationIndex) {
             if (weatherSeries != null) {
                 currentView = new WeatherView(weatherSeries, currentPageTitle, dataIsStale);
@@ -97,5 +103,25 @@ class WeatherViewManager {
 
             switchView();
         }
+
+        if (dataIsStale && requestIsCompleted) {
+            requestDelayedRefresh();
+        }
+    }
+
+    private function requestDelayedRefresh() as Void {
+        if (!delayedRefreshRequested) {
+            Utils.log("Delayed refresh requested.");
+
+            refreshTimer.start(method(:onDelayedRefresh), Constants.REFRESH_DELAY_S * 1000, false);
+
+            delayedRefreshRequested = true;
+        }
+    }
+
+    function onDelayedRefresh() as Void {
+        Utils.log("Delayed refresh running.");
+
+        refreshWeatherCache(currentLocationIndex);
     }
 }

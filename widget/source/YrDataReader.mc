@@ -24,22 +24,17 @@ class YrDataReader {
         }
     }
 
-    function getWeatherData(latitude as Float, longitude as Float, handle as Number, callback as Method(weatherData as Array<Dictionary>?, handle as Number, dataIsStale as Boolean) as Void) as Void {
+    function getWeatherData(latitude as Float, longitude as Float, handle as Number, callback as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void) as Void {
         var cache = YrDataCache.tryGetCachedData(latitude, longitude, false);
         if (cache != null) {
-            callback.invoke(cache as Array<Dictionary>, handle, false);
+            callback.invoke(cache as Array<Dictionary>, handle, true, false);
 
             return;
         }
 
-        var staleDataIsShown = false;
-        if (connectionProblem) {
-            cache = YrDataCache.tryGetCachedData(latitude, longitude, true);
-            if (cache != null) {
-                staleDataIsShown = true;
-            }
-
-            callback.invoke(cache, handle, true);
+        var existingConnectionProblem = connectionProblem;
+        if (existingConnectionProblem) {
+            showStaleData(latitude, longitude, handle, false, callback);
         }
 
         if (requestIsRunning[handle]) {
@@ -62,7 +57,7 @@ class YrDataReader {
                 "latitude" => latitude,
                 "longitude" => longitude,
                 "handle" => handle,
-                "staleDataIsShown" => staleDataIsShown,
+                "existingConnectionProblem" => existingConnectionProblem,
             },
         };
 
@@ -72,8 +67,8 @@ class YrDataReader {
     }
 
     function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Number>) as Void {
-        var callback = context["callback"];
-        var handle = context["handle"];
+        var callback = context["callback"] as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void;
+        var handle = context["handle"] as Number;
 
         var done = false;
         if (responseCode >= 200 && responseCode < 300 && data != null) {
@@ -87,7 +82,7 @@ class YrDataReader {
 
                 Utils.log("Received data for handle: " + handle + ", " + Utils.locationToString(coordinates[1], coordinates[0]));
 
-                (callback as Method).invoke(timeseries, handle, false);
+                callback.invoke(timeseries, handle, true, false);
 
                 done = true;
             } catch (exception instanceof UnexpectedTypeException) {
@@ -101,13 +96,17 @@ class YrDataReader {
         if (!done) {
             connectionProblem = true;
 
-            if (!(context["staleDataIsShown"] as Boolean)) {
-                var cache = YrDataCache.tryGetCachedData(context["latitude"] as Float, context["longitude"] as Float, true);
-                (callback as Method).invoke(cache, handle, true);
+            if (!(context["existingConnectionProblem"] as Boolean)) {
+                showStaleData(context["latitude"] as Float, context["longitude"] as Float, handle, true, callback);
             }
         }
 
         requestIsRunning[handle] = false;
+    }
+
+    private function showStaleData(latitude as Float, longitude as Float, handle as Number, requestIsCompleted as Boolean, callback as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void) as Void {
+        var cache = YrDataCache.tryGetCachedData(latitude, longitude, true);
+        callback.invoke(cache, handle, requestIsCompleted, true);
     }
 
     function getStatus() as Void {
