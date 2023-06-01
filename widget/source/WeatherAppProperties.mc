@@ -10,26 +10,51 @@ class WeatherAppProperties {
 
         if (locations != null) {
             var needsUpdate = false;
-            for (var i = 0; i < locations.size(); i++) {
-                var latitude = locations[i]["latitude"] as Float;
+            var i = 0;
+            while (i < locations.size()) {
+                var location = locations[i];
+                var latitude = location["latitude"] as Float;
                 var latitudeSanitised = Math.round(latitude * 1000) / 1000;
                 if (latitudeSanitised != latitude) {
-                    locations[i]["latitude"] = latitudeSanitised;
+                    location["latitude"] = latitudeSanitised;
+
+                    Utils.log("Location latitude truncated: " + latitude + " => " + latitudeSanitised);
+
                     needsUpdate = true;
                 }
 
-                var longitude = locations[i]["longitude"] as Float;
+                var longitude = location["longitude"] as Float;
                 var longitudeSanitised = Math.round(longitude * 1000) / 1000;
                 if (longitudeSanitised != longitude) {
-                    locations[i]["longitude"] = longitudeSanitised;
+                    location["longitude"] = longitudeSanitised;
+
+                    Utils.log("Location longitude truncated: " + longitude + " => " + longitudeSanitised);
+
                     needsUpdate = true;
+                }
+
+                var j;
+                for (j = 0; j < i; j++) {
+                    var firstLatitude = locations[j]["latitude"] as Float;
+                    var firstLongitude = locations[j]["longitude"] as Float;
+
+                    if (latitudeSanitised == firstLatitude && longitudeSanitised == firstLongitude) {
+                        locations.remove(location);
+                        needsUpdate = true;
+
+                        Utils.log("Duplicate location removed: " + location.toString());
+
+                        break;
+                    }
+                }
+
+                if (j == i) {
+                    i++;
                 }
             }
 
             if (needsUpdate) {
                 Properties.setValue("locations", locations as Array<PropertyValueType>);
-
-                Utils.log("Locations sanitised");
             }
         }
 
