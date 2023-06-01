@@ -49,7 +49,7 @@ class WeatherViewManager {
 
     function displayWeatherForCurrentLocation() as Void {
         if (locations.size() > 0) {
-            var location = locations[currentLocationIndex] as Dictionary<String, Float or String>;
+            var location = getLocation(currentLocationIndex);
             var latitude = location["latitude"] as Float;
             var longitude = location["longitude"] as Float;
 
@@ -66,31 +66,36 @@ class WeatherViewManager {
                 switchView();
             }
 
-            reader.getWeatherData(latitude, longitude, method(:onWeatherDataReady));
-
             refreshWeatherCache(currentLocationIndex);
         }
     }
 
-    private function refreshWeatherCache(excludedIndex as Number) as Void {
-        for (var i = 0; i < locations.size(); i++) {
-            if (i != excludedIndex) {
-                var location = locations[i] as Dictionary<String, Float or String>;
-                var latitude = location["latitude"] as Float;
-                var longitude = location["longitude"] as Float;
+    private function refreshWeatherCache(startIndex as Number) as Void {
+        Utils.log("Refreshing cache.");
 
-                reader.getWeatherData(latitude, longitude, null);
-            }
+        for (var counter = 0; counter < locations.size(); counter++) {
+            var index = (startIndex + counter) % locations.size();
+            var location = getLocation(index);
+            var latitude = location["latitude"] as Float;
+            var longitude = location["longitude"] as Float;
+
+            reader.getWeatherData(latitude, longitude, index, method(:onWeatherDataReady));
         }
     }
 
-    function onWeatherDataReady(weatherSeries as Array<Dictionary>?, connectionProblem as Boolean) as Void {
-        if (weatherSeries != null) {
-            currentView = new WeatherView(weatherSeries, currentPageTitle, connectionProblem);
-        } else {
-            currentView = new BaseWeatherView(currentPageTitle, connectionProblem);
-        }
+    private function getLocation(index as Number) as Dictionary<String, Float or String or Boolean> {
+        return locations[index] as Dictionary<String, Float or String or Boolean>;
+    }
 
-        switchView();
+    function onWeatherDataReady(weatherSeries as Array<Dictionary>?, handle as Number, dataIsStale as Boolean) as Void {
+        if (handle == currentLocationIndex) {
+            if (weatherSeries != null) {
+                currentView = new WeatherView(weatherSeries, currentPageTitle, dataIsStale);
+            } else {
+                currentView = new BaseWeatherView(currentPageTitle, dataIsStale);
+            }
+
+            switchView();
+        }
     }
 }
