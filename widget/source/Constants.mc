@@ -4,6 +4,8 @@ import Toybox.WatchUi;
 
 (:glance)
 class Constants {
+    static const REFRESH_DELAY_S = 30;
+
     (:roundScreen)
     static const DAYS_TO_SHOW = 5;
     (:semioctagonalScreen)
