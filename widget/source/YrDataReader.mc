@@ -1,5 +1,6 @@
 import Toybox.Lang;
 import Toybox.Application;
+import Toybox.System;
 import Toybox.Communications;
 
 class YrDataReader {
@@ -43,8 +44,6 @@ class YrDataReader {
             return;
         }
 
-        requestIsRunning[handle] = true;
-
         var params = {
             "lat" => latitude.format("%.3f"),
             "lon" => longitude.format("%.3f"),
@@ -61,9 +60,19 @@ class YrDataReader {
             },
         };
 
-        Communications.makeWebRequest(baseUrl + DATA_PATH, params, options, method(:onReceiveData));
+        if (System.getDeviceSettings().connectionAvailable) {
+            requestIsRunning[handle] = true;
 
-        Utils.log("Sent request for handle: " + handle + ", " + Utils.locationToString(latitude, longitude));
+            Communications.makeWebRequest(baseUrl + DATA_PATH, params, options, method(:onReceiveData));
+
+            Utils.log("Sent request for handle: " + handle + ", " + Utils.locationToString(latitude, longitude));
+        } else {
+            connectionProblem = true;
+
+            showStaleData(latitude, longitude, handle, true, callback);
+
+            Utils.log("No connection for request: handle: " + handle + ", " + Utils.locationToString(latitude, longitude));
+        }
     }
 
     function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Number>) as Void {
