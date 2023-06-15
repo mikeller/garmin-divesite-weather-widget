@@ -1,4 +1,5 @@
 project.manifest = manifest.xml
 
-base.excludeAnnotations = semioctagonalScreen
-semioctagon-176x176.excludeAnnotations = roundScreen
+base.excludeAnnotations = semioctagonalScreen; blackAndWhiteDisplay
+
+descentg1.excludeAnnotations = roundScreen; colourDisplay

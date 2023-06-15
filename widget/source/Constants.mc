@@ -36,9 +36,21 @@ class Constants {
 
     static const COLOUR_BACKGROUND as Number = Graphics.COLOR_BLACK;
     static const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;
+
+    (:colourDisplay)
     static const COLOUR_WIND as Number = 0x00ffff;
+    (:blackAndWhiteDisplay)
+    static const COLOUR_WIND as Number = Graphics.COLOR_WHITE;
+
+    (:colourDisplay)
     static const COLOUR_TEMPERATURE as Number = 0xff5555;
+    (:blackAndWhiteDisplay)
+    static const COLOUR_TEMPERATURE as Number = Graphics.COLOR_WHITE;
+
+    (:colourDisplay)
     static const COLOUR_WEATHER as Number = Graphics.COLOR_YELLOW;
+    (:blackAndWhiteDisplay)
+    static const COLOUR_WEATHER as Number = Graphics.COLOR_WHITE;
 
     static const WEATHER_SYMBOL_UNKNOWN_STRING as String = "  ?";
 

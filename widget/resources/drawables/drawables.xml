@@ -2,6 +2,7 @@
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
 
     <bitmap id="ConnectionProblemIcon" filename="connection_problem_icon.png" />
+    <bitmap id="ConnectionProblemIconBlackAndWhite" filename="connection_problem_icon_bw.png" />
 
     // Core icons (for most areas where diving is happening anyway)
     <bitmap id="clearsky_day" scope="glance" filename="weather_icons/clearsky_day.png" />
