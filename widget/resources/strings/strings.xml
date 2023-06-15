@@ -1,5 +1,6 @@
 <strings>
     <string id="AppName" scope="glance">Divesite Weather</string>
+    <string id="AppNameBeta" scope="glance">Divesite Weather (Beta)</string>
 
     <string id="LocationsTitle">Locations</string>
     <string id="LocationDisplayNameTitle">Display name</string>
