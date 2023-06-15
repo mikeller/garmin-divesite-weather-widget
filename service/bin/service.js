@@ -118,7 +118,11 @@ function transformResponse(response, expires) {
             let day = getDay(localTime, days);
 
             day.max_air_temperature = Math.max(day.max_air_temperature || -Infinity, entry.data.instant.details.air_temperature);
-            day.max_wind_speed = Math.max(day.max_wind_speed || -Infinity, entry.data.instant.details.wind_speed);
+            let windSpeed = entry.data.instant.details.wind_speed;
+            if (windSpeed && (!day.max_wind_speed || windSpeed > day.max_wind_speed)) {
+                day.max_wind_speed = windSpeed;
+                day.max_wind_from_direction = entry.data.instant.details.wind_from_direction;
+            }
         }
 
         if (hour >= 1 && hour < 12) {
