@@ -2,7 +2,16 @@
     <bitmap id="LauncherIcon" filename="launcher_icon.png" />
 
     <bitmap id="ConnectionProblemIcon" filename="connection_problem_icon.png" />
-    <bitmap id="ConnectionProblemIconBlackAndWhite" filename="connection_problem_icon_bw.png" />
+
+    // Wind direction arrows
+    <bitmap id="Arrow0" scope="glance" filename="arrows/arrow_0.svg" />
+    <bitmap id="Arrow45" scope="glance" filename="arrows/arrow_45.svg" />
+    <bitmap id="Arrow90" scope="glance" filename="arrows/arrow_90.svg" />
+    <bitmap id="Arrow135" scope="glance" filename="arrows/arrow_135.svg" />
+    <bitmap id="Arrow180" scope="glance" filename="arrows/arrow_180.svg" />
+    <bitmap id="Arrow225" scope="glance" filename="arrows/arrow_225.svg" />
+    <bitmap id="Arrow270" scope="glance" filename="arrows/arrow_270.svg" />
+    <bitmap id="Arrow315" scope="glance" filename="arrows/arrow_315.svg" />
 
     // Core icons (for most areas where diving is happening anyway)
     <bitmap id="clearsky_day" scope="glance" filename="weather_icons/clearsky_day.png" />

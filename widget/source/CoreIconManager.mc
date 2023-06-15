@@ -1,10 +1,54 @@
 import Toybox.Lang;
+import Toybox.Math;
 import Toybox.WatchUi;
 
 (:glance)
-class CoreWeatherIcons {
+class CoreIconManager {
     // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
-    static function loadIcon(name as String) as BitmapResource? {
+    static function loadArrowIcon(directionFrom as Float) as BitmapResource? {
+        var arrowIcon;
+
+        directionFrom = Math.round(directionFrom / 45).toNumber() % 8;
+
+        switch (directionFrom) {
+        case 0:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow0);
+
+            break;
+        case 1:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow45);
+
+            break;
+        case 2:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow90);
+
+            break;
+        case 3:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow135);
+
+            break;
+        case 4:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow180);
+
+            break;
+        case 5:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow225);
+
+            break;
+        case 6:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow270);
+
+            break;
+        case 7:
+            arrowIcon = WatchUi.loadResource(Rez.Drawables.Arrow315);
+
+            break;
+        }
+
+        return arrowIcon;
+    }
+
+    static function loadWeatherIcon(name as String) as BitmapResource? {
         var weatherIcon;
         switch (name) {
         case "clearsky_day":

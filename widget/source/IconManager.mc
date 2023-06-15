@@ -1,14 +1,14 @@
 import Toybox.Lang;
 import Toybox.WatchUi;
 
-class WeatherIcons extends CoreWeatherIcons {
+class IconManager extends CoreIconManager {
     function initialize() {
-        CoreWeatherIcons.initialize();
+        CoreIconManager.initialize();
     }
     
     // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
-    static function loadIcon(name as String) as BitmapResource? {
-        var weatherIcon = CoreWeatherIcons.loadIcon(name);
+    static function loadWeatherIcon(name as String) as BitmapResource? {
+        var weatherIcon = CoreIconManager.loadWeatherIcon(name);
 
         if (weatherIcon != null) {
             return weatherIcon;
@@ -83,11 +83,6 @@ class WeatherIcons extends CoreWeatherIcons {
             weatherIcon = WatchUi.loadResource(Rez.Drawables.rainshowers_day);
 
             break;
-
-
-
-
-
         case "clearsky_night":
             weatherIcon = WatchUi.loadResource(Rez.Drawables.clearsky_night);
 
