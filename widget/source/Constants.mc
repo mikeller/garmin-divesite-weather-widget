@@ -14,7 +14,7 @@ class Constants {
     static const VERTICAL_SPACE as Number = 2;
 
     (:roundScreen)
-    static const HORIZONTAL_SPACE as Number = 2;
+    static const HORIZONTAL_SPACE as Number = 1;
     (:semioctagonalScreen)
     static const HORIZONTAL_SPACE as Number = 1;
 
@@ -22,6 +22,8 @@ class Constants {
     static const HORIZONTAL_SPACE_SYMBOLS as Number = 2;
     (:semioctagonalScreen)
     static const HORIZONTAL_SPACE_SYMBOLS as Number = 4;
+
+    static const WIND_DIRECTION_ARROW_WIDTH as Number = 13;
 
     static const LINE_WIDTH as Number = 3;
 
@@ -32,7 +34,10 @@ class Constants {
     static const SUB_WINDOW_X = 113;
 
     (:semioctagonalScreen)
-    static const SUB_WINDOW_Y = 32;
+    static const SUB_WINDOW_Y = 1;
+
+    (:semioctagonalScreen)
+    static const SUB_WINDOW_SIZE = 62;
 
     static const COLOUR_BACKGROUND as Number = Graphics.COLOR_BLACK;
     static const COLOUR_FOREGROUND as Number = Graphics.COLOR_WHITE;

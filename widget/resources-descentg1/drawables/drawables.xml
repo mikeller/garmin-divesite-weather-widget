@@ -1,0 +1,15 @@
+<drawables>
+    <bitmap id="LauncherIcon" filename="launcher_icon.png" />
+
+    <bitmap id="ConnectionProblemIcon" filename="connection_problem_icon_bw.png" />
+
+    // Wind direction arrows
+    <bitmap id="Arrow0" scope="glance" filename="arrows/arrow_0_bw.svg" />
+    <bitmap id="Arrow45" scope="glance" filename="arrows/arrow_45_bw.svg" />
+    <bitmap id="Arrow90" scope="glance" filename="arrows/arrow_90_bw.svg" />
+    <bitmap id="Arrow135" scope="glance" filename="arrows/arrow_135_bw.svg" />
+    <bitmap id="Arrow180" scope="glance" filename="arrows/arrow_180_bw.svg" />
+    <bitmap id="Arrow225" scope="glance" filename="arrows/arrow_225_bw.svg" />
+    <bitmap id="Arrow270" scope="glance" filename="arrows/arrow_270_bw.svg" />
+    <bitmap id="Arrow315" scope="glance" filename="arrows/arrow_315_bw.svg" /> 
+</drawables>
