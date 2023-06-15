@@ -25,8 +25,7 @@ class BaseWeatherView extends WatchUi.View {
         var screenHeight = dc.getHeight();
 
         if (dataIsStale) {
-            var connectionProblemIcon = WatchUi.loadResource(Rez.Drawables.ConnectionProblemIcon) as BitmapReference;
-            dc.drawBitmap(screenWidth / 2 - 10, 2 * Constants.VERTICAL_SPACE, connectionProblemIcon);
+            dc.drawBitmap(screenWidth / 2 - 10, 2 * Constants.VERTICAL_SPACE, getConnectionProblemIcon());
         }
 
         var titleWidth = getTitleWidth(dc);
@@ -37,6 +36,16 @@ class BaseWeatherView extends WatchUi.View {
         dc.setPenWidth(Constants.LINE_WIDTH);
         dc.drawLine(0, cursorY, titleWidth, cursorY);
         cursorY += Constants.LINE_WIDTH + Constants.VERTICAL_SPACE;
+    }
+
+    (:colourDisplay)
+    private function getConnectionProblemIcon() as BitmapReference {
+        return WatchUi.loadResource(Rez.Drawables.ConnectionProblemIcon) as BitmapReference;
+    }
+
+    (:blackAndWhiteDisplay)
+    private function getConnectionProblemIcon() as BitmapReference {
+        return WatchUi.loadResource(Rez.Drawables.ConnectionProblemIconBlackAndWhite) as BitmapReference;
     }
 
     (:roundScreen)
