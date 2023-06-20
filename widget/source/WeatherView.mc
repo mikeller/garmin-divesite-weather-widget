@@ -150,10 +150,12 @@ class WeatherView extends BaseWeatherView {
             index++;
         }
 
-        dc.setColor(Constants.COLOUR_WIND, Constants.COLOUR_BACKGROUND);
-        dc.drawText(columnsX[2] + Constants.WIND_DIRECTION_ARROW_WIDTH, cursorY, Graphics.FONT_SYSTEM_TINY, Constants.METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
-        dc.setColor(Constants.COLOUR_TEMPERATURE, Constants.COLOUR_BACKGROUND);
-        dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+        if (count > 0) {
+            dc.setColor(Constants.COLOUR_WIND, Constants.COLOUR_BACKGROUND);
+            dc.drawText(columnsX[2] + Constants.WIND_DIRECTION_ARROW_WIDTH, cursorY, Graphics.FONT_SYSTEM_TINY, Constants.METRES_PER_SECOND_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+            dc.setColor(Constants.COLOUR_TEMPERATURE, Constants.COLOUR_BACKGROUND);
+            dc.drawText(columnsX[3], cursorY, Graphics.FONT_SYSTEM_TINY, Constants.DEGREES_C_STRING, Graphics.TEXT_JUSTIFY_RIGHT);
+        }
     }
 
    (:roundScreen)
