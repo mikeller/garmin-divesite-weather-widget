@@ -16,6 +16,9 @@ class WeatherViewManager {
 
     private var started as Boolean = false;
 
+    private var retryTimer as Timer.Timer = new Timer.Timer();
+    private var retryIndex as Number = -1;
+
     private var refreshTimer as Timer.Timer = new Timer.Timer();
     private var delayedRefreshRequested as Boolean = false;
 
@@ -85,8 +88,17 @@ class WeatherViewManager {
             var latitude = location["latitude"] as Float;
             var longitude = location["longitude"] as Float;
 
-            reader.getWeatherData(latitude, longitude, index, method(:onWeatherDataReady));
+            if (!reader.getWeatherData(latitude, longitude, index, method(:onWeatherDataReady)) && retryIndex == -1) {
+                retryIndex = index;
+                refreshTimer.start(method(:onRetryRequest), 1000, false);
+            }
         }
+    }
+
+    function onRetryRequest() as Void {
+        var index = retryIndex;
+        retryIndex = -1;
+        refreshWeatherCache(index);
     }
 
     private function getLocation(index as Number) as Dictionary<String, Float or String or Boolean> {
@@ -121,6 +133,8 @@ class WeatherViewManager {
 
     function onDelayedRefresh() as Void {
         Utils.log("Delayed refresh running.");
+
+        delayedRefreshRequested = false;
 
         refreshWeatherCache(currentLocationIndex);
     }

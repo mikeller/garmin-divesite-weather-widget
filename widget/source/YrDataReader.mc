@@ -11,6 +11,7 @@ class YrDataReader {
 
     private var connectionProblem as Boolean = false;
 
+    private var concurrentRequestCount as Number = 0;
     private var requestIsRunning as Dictionary<Number, Boolean> = {} as Dictionary<Number, Boolean>;
 
     // YR weather data URL (too verbose for the device):
@@ -25,12 +26,21 @@ class YrDataReader {
         }
     }
 
-    function getWeatherData(latitude as Float, longitude as Float, handle as Number, callback as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void) as Void {
+    function getWeatherData(latitude as Float, longitude as Float, handle as Number, callback as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void) as Boolean {
+        if (concurrentRequestCount >= Constants.MAX_CONCURRENT_REQUESTS) {
+            Utils.log("Concurrent request limit reached for handle: " + handle);
+
+            return false;
+        } else {
+            concurrentRequestCount++;
+        }
+
         var cache = YrDataCache.tryGetCachedData(latitude, longitude, false);
         if (cache != null) {
             callback.invoke(cache as Array<Dictionary>, handle, true, false);
 
-            return;
+            concurrentRequestCount--;
+            return true;
         }
 
         var existingConnectionProblem = connectionProblem;
@@ -41,7 +51,8 @@ class YrDataReader {
         if (requestIsRunning[handle]) {
             Utils.log("Request already running for handle: " + handle);
 
-            return;
+            concurrentRequestCount--;
+            return true;
         }
 
         var params = {
@@ -72,7 +83,11 @@ class YrDataReader {
             showStaleData(latitude, longitude, handle, true, callback);
 
             Utils.log("No connection for request: handle: " + handle + ", " + Utils.locationToString(latitude, longitude));
+
+            concurrentRequestCount--;
         }
+
+        return true;
     }
 
     function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Number>) as Void {
@@ -111,6 +126,7 @@ class YrDataReader {
         }
 
         requestIsRunning[handle] = false;
+        concurrentRequestCount--;
     }
 
     private function showStaleData(latitude as Float, longitude as Float, handle as Number, requestIsCompleted as Boolean, callback as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void) as Void {
