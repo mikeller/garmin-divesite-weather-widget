@@ -6,7 +6,7 @@ import Toybox.WatchUi;
 class CoreIconManager {
     // This whole thing is pretty useless, but forced upon us by the poor way that Garmin handles resource access
     static function loadArrowIcon(directionFrom as Float) as BitmapResource? {
-        var arrowIcon;
+        var arrowIcon = null;
 
         directionFrom = Math.round(directionFrom / 45).toNumber() % 8;
 
@@ -45,11 +45,11 @@ class CoreIconManager {
             break;
         }
 
-        return arrowIcon;
+        return arrowIcon as BitmapResource?;
     }
 
     static function loadWeatherIcon(name as String) as BitmapResource? {
-        var weatherIcon;
+        var weatherIcon = null;
         switch (name) {
         case "clearsky_day":
             weatherIcon = WatchUi.loadResource(Rez.Drawables.clearsky_day);
@@ -121,6 +121,6 @@ class CoreIconManager {
             break;
         }
 
-        return weatherIcon;
+        return weatherIcon as BitmapResource?;
     }
 }

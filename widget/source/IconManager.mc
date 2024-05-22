@@ -349,6 +349,6 @@ class IconManager extends CoreIconManager {
             break;
         }
 
-        return weatherIcon;
+        return weatherIcon as BitmapResource?;
     }
 }

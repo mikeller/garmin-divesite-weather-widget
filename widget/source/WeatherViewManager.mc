@@ -22,7 +22,7 @@ class WeatherViewManager {
     private var refreshTimer as Timer.Timer = new Timer.Timer();
     private var delayedRefreshRequested as Boolean = false;
 
-    function initialize(locations as Array<Dictionary>) {
+    function initialize(locations as Array<Dictionary>?) {
         if (locations != null) {
             self.locations = locations;
         }
@@ -39,10 +39,10 @@ class WeatherViewManager {
         started = true;
     }
 
-    function getInitialView() as Array<Views or InputDelegates>? {
+    function getInitialView() as [ Views ] or [ Views, InputDelegates ] {
         Utils.log("Initial view loaded.");
 
-        return [ currentView, behaviourDelegate ] as Array<Views or InputDelegates>;
+        return [ currentView, behaviourDelegate ] as [ Views, InputDelegates ];
     }
 
     private function switchView () as Void {
@@ -90,7 +90,7 @@ class WeatherViewManager {
 
             if (!reader.getWeatherData(latitude, longitude, index, method(:onWeatherDataReady)) && retryIndex == -1) {
                 retryIndex = index;
-                refreshTimer.start(method(:onRetryRequest), 1000, false);
+                retryTimer.start(method(:onRetryRequest), 1000, false);
             }
         }
     }

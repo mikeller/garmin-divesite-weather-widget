@@ -6,7 +6,7 @@ import Toybox.Application.Properties;
 (:glance)
 class WeatherAppProperties {
     static function getLocationsProperty() as Array<Dictionary>? {
-        var locations = Properties.getValue("locations") as Array<Dictionary>;
+        var locations = Properties.getValue("locations") as Array<Dictionary>?;
 
         if (locations != null) {
             var needsUpdate = false;
@@ -62,7 +62,7 @@ class WeatherAppProperties {
     }
 
     static function getCustomUrl() as String? {
-        var customUrl = Properties.getValue("customUrl");
+        var customUrl = Properties.getValue("customUrl") as String;
         if ("".equals(customUrl)) {
             customUrl = null;
         }

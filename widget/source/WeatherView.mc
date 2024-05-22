@@ -8,13 +8,11 @@ class WeatherView extends BaseWeatherView {
     private var dateFont as Graphics.FontDefinition = Graphics.FONT_SYSTEM_TINY;
 
     private var weatherSeries as Array<Dictionary> = [{}] as Array<Dictionary>;
-    private var displayName as String = "";
         
     function initialize(weatherSeries as Array<Dictionary>, displayName as String, dataIsStale as Boolean) {
         BaseWeatherView.initialize(displayName, dataIsStale);
 
         self.weatherSeries = weatherSeries;
-        self.displayName = displayName;
     }
 
     protected function drawDayForecast(dc as Graphics.Dc, columnsX as Array<Number>, cursorY as Number, day as Moment or String, weatherInfo as Dictionary<String, String or Dictionary>, isFirstLine as Boolean) as Void {
@@ -46,9 +44,9 @@ class WeatherView extends BaseWeatherView {
                 }
             }
 
-            var airTemperatureC = data["max_air_temperature"];
-            var morningWeatherSymbol = data["morning_symbol_code"];
-            var afternoonWeatherSymbol = data["afternoon_symbol_code"];
+            var airTemperatureC = data["max_air_temperature"] as Float?;
+            var morningWeatherSymbol = data["morning_symbol_code"] as String?;
+            var afternoonWeatherSymbol = data["afternoon_symbol_code"] as String?;
             drawTemperatureSymbols(dc, airTemperatureC, morningWeatherSymbol, afternoonWeatherSymbol, columnsX[3], columnsX[4], columnsX[5], cursorY, isFirstLine);
         } catch (exception instanceof UnexpectedTypeException) {
             Utils.log("Data format problem: " + exception.getErrorMessage());
@@ -125,9 +123,9 @@ class WeatherView extends BaseWeatherView {
             var weatherInfo = weatherSeries[index];
 
             var day = Gregorian.moment({
-                :year => ((weatherInfo["time"] as String).substring( 0, 4) as String).toNumber(),
-                :month => ((weatherInfo["time"] as String).substring( 5, 7) as String).toNumber(),
-                :day => ((weatherInfo["time"] as String).substring( 8, 10) as String).toNumber(),
+                :year => ((weatherInfo["time"] as String).substring( 0, 4) as String).toNumber() as Number,
+                :month => ((weatherInfo["time"] as String).substring( 5, 7) as String).toNumber() as Number,
+                :day => ((weatherInfo["time"] as String).substring( 8, 10) as String).toNumber() as Number,
             });
 
             var todayInfo = Gregorian.info(Time.now(), Time.FORMAT_LONG);
@@ -172,7 +170,7 @@ class WeatherView extends BaseWeatherView {
             angle += Math.PI;
         }
         var normalisedX = Math.cos(angle);
-        return Math.round(circleOriginX - (normalisedX * circleOriginX));
+        return Math.round(circleOriginX - (normalisedX * circleOriginX)).toNumber();
     }
 
     (:semioctagonalScreen)
