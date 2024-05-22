@@ -41,9 +41,9 @@ class WeatherGlanceView extends WatchUi.GlanceView {
                         var weatherInfo = cache[index];
 
                         var day = Gregorian.moment({
-                            :year => ((weatherInfo["time"] as String).substring( 0, 4) as String).toNumber(),
-                            :month => ((weatherInfo["time"] as String).substring( 5, 7) as String).toNumber(),
-                            :day => ((weatherInfo["time"] as String).substring( 8, 10) as String).toNumber(),
+                            :year => ((weatherInfo["time"] as String).substring( 0, 4) as String).toNumber() as Number,
+                            :month => ((weatherInfo["time"] as String).substring( 5, 7) as String).toNumber() as Number,
+                            :day => ((weatherInfo["time"] as String).substring( 8, 10) as String).toNumber() as Number,
                         });
 
                         var todayInfo= Gregorian.info(Time.now(), Time.FORMAT_LONG);
@@ -56,11 +56,11 @@ class WeatherGlanceView extends WatchUi.GlanceView {
                         if (day.compare(today) >= 0) {
                             var data = weatherInfo["data"] as Dictionary<String, Float or String>;
                             
-                            windFromDirectionDegrees = data["max_wind_from_direction"];
-                            windSpeedMs = data["max_wind_speed"];
-                            airTemperatureC = data["max_air_temperature"];
-                            morningWeatherSymbol = data["morning_symbol_code"];
-                            afternoonWeatherSymbol = data["afternoon_symbol_code"];
+                            windFromDirectionDegrees = data["max_wind_from_direction"] as Float?;
+                            windSpeedMs = data["max_wind_speed"] as Float?;
+                            airTemperatureC = data["max_air_temperature"] as Float?;
+                            morningWeatherSymbol = data["morning_symbol_code"] as String?;
+                            afternoonWeatherSymbol = data["afternoon_symbol_code"] as String?;
 
                             break;
                         }

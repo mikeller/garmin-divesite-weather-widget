@@ -90,7 +90,7 @@ class YrDataReader {
         return true;
     }
 
-    function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Number>) as Void {
+    function onReceiveData(responseCode as Number, data as Dictionary?, context as Dictionary<String, String or Method or Number or Float or Boolean>) as Void {
         var callback = context["callback"] as Method(weatherData as Array<Dictionary>?, handle as Number, requestIsCompleted as Boolean, dataIsStale as Boolean) as Void;
         var handle = context["handle"] as Number;
 
@@ -98,7 +98,7 @@ class YrDataReader {
         if (responseCode >= 200 && responseCode < 300 && data != null) {
             try {
                 var coordinates = (data["geometry"] as Dictionary<String, String or Array>)["coordinates"] as Array<Float>;
-                var timeseries = (data["properties"] as Dictionary<String, Dictionary>)["timeseries"] as Array<Dictionary>;
+                var timeseries = (data["properties"] as Dictionary<String, Dictionary or Array>)["timeseries"] as Array<Dictionary>;
 
                 YrDataCache.setCachedData(coordinates[1], coordinates[0], data as Dictionary<String, PropertyValueType>);
 
@@ -139,7 +139,7 @@ class YrDataReader {
             :method => Communications.HTTP_REQUEST_METHOD_GET,
         };
 
-        Communications.makeWebRequest(baseUrl + STATUS_PATH, { }, options, method(:onReceiveStatus));
+        Communications.makeWebRequest(baseUrl + STATUS_PATH, null, options, method(:onReceiveStatus));
     }
 
     function onReceiveStatus(responseCode as Number, data as Dictionary?) as Void {

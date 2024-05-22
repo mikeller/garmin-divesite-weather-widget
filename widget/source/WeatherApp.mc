@@ -16,12 +16,12 @@ class WeatherApp extends Application.AppBase {
         }
     }
 
-    function getGlanceView() as Array<GlanceView>? {
-        return [new WeatherGlanceView(locations.size() > 0 ? locations[0] : null)] as Array<GlanceView>;
+    function getGlanceView() as [ GlanceView ] or [ GlanceView, GlanceViewDelegate ] or Null {
+        return [new WeatherGlanceView(locations.size() > 0 ? locations[0] : null)] as [GlanceView];
     }
 
     (:typecheck(disableGlanceCheck))
-    function getInitialView() as Array<Views or InputDelegates>? {
+    function getInitialView() as [ Views ] or [ Views, InputDelegates ] {
         if (viewManager == null) {
             viewManager = new WeatherViewManager(locations);
         }

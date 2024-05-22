@@ -9,26 +9,21 @@ class YrDataCache {
     static function tryGetCachedData(latitude as Float, longitude as Float, ignoreExpiry as Boolean) as Array<Dictionary>? {
         var data = Storage.getValue(Utils.locationToString(latitude, longitude));
         if (data != null) {
-            try {
-                var properties = (data as Dictionary<String, Dictionary>)["properties"] as Dictionary<String, Dictionary>;
+            var properties = (data as Dictionary<String, Dictionary>)["properties"] as Dictionary<String, Dictionary or Array>;
 
-                var timeseries = properties["timeseries"] as Array<Dictionary>;
-            
-                var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String?;
-                var expires = Utils.parseIsoDate(expiresString);
-                var isStale = expires == null || (expires as Moment).lessThan(Time.now());
-                if (!isStale || ignoreExpiry) {
-                    Utils.log("Cache hit (" + (isStale ? "stale, " : "") + "expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
+            var timeseries = properties["timeseries"] as Array<Dictionary>;
+        
+            var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String?;
+            var expires = Utils.parseIsoDate(expiresString);
+            var isStale = expires == null || (expires as Moment).lessThan(Time.now());
+            if (!isStale || ignoreExpiry) {
+                Utils.log("Cache hit (" + (isStale ? "stale, " : "") + "expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
 
-                    return timeseries;
-                } else {
-                    Utils.log("Cache miss (stale data found, expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
+                return timeseries;
+            } else {
+                Utils.log("Cache miss (stale data found, expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
 
-                    return null;
-                }
-            } catch (exception instanceof UnexpectedTypeException) {
-                Utils.log("Cache data format problem: (exception: " + exception.getErrorMessage() + "): " + Utils.locationToString(latitude, longitude));
-                exception.printStackTrace();
+                return null;
             }
         }
 
