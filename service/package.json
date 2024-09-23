@@ -13,7 +13,7 @@
     "develop": "DEBUG=* nodemon ./bin/service.js"
   },
   "dependencies": {
-    "@photostructure/tz-lookup": "^7.0.0",
+    "@photostructure/tz-lookup": "^11.0.0",
     "debug": "^4.3.7",
     "express": "^4.21.0",
     "make-fetch-happen": "^11.0.1",
