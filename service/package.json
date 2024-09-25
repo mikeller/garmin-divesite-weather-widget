@@ -17,6 +17,7 @@
     "debug": "^4.3.7",
     "express": "^4.21.0",
     "make-fetch-happen": "^13.0.1",
+    "mkdirp": "^3.0.1",
     "moment-timezone": "^0.5.45"
   },
   "devDependencies": {
