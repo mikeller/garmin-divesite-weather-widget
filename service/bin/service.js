@@ -21,7 +21,10 @@ const app = express();
 app.get('/data', getData);
 
 app.get('/status', (req, res) => {
-    res.json({ status: 'ok' });
+    res.json({
+        status: 'ok',
+        uptime: process.uptime(),
+    });
 });
 
 app.get('/', (req, res) => {
