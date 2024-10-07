@@ -93,6 +93,8 @@ jobs:
           if [[ "${UPTIME}" -gt 360 ]]; then
             echo "Service has not been restarted recently"
             exit 1
+          else
+            echo "Service uptime is ${UPTIME}."
           fi
 
       - name: check response
