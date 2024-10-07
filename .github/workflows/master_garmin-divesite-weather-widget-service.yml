@@ -88,12 +88,18 @@ jobs:
     steps:
       - name: check uptime
         run: |
+          sleep 180
           UPTIME=$(curl https://garmin-divesite-weather-widget-service.azurewebsites.net/status | jq -r ".uptime")
-          if [[ $UPTIME -gt 180 ]]; then
+          if [[ "${UPTIME}" -gt 360 ]]; then
             echo "Service has not been restarted recently"
             exit 1
           fi
 
       - name: check response
         run: |
-          curl https://garmin-divesite-weather-widget-service.azurewebsites.net/data?lat=-43&lon=171 | jq -e ".properties.timeseries"
+          curl https://garmin-divesite-weather-widget-service.azurewebsites.net/data\?lat=-43\&lon=171 | jq -e ".properties.timeseries"
+          if [[ $? -ne 0 ]]; then
+            echo "Service did not return a timeseries"
+            exit 1
+          fi
+          
