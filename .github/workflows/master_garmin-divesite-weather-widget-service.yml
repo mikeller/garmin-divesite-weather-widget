@@ -79,3 +79,21 @@ jobs:
           app-name: 'garmin-divesite-weather-widget-service'
           slot-name: 'Production'
           package: .
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    needs: deploy
+
+    steps:
+      - name: check uptime
+        run: |
+          UPTIME=$(curl https://garmin-divesite-weather-widget-service.azurewebsites.net/status | jq -r ".uptime")
+          if [[ $UPTIME -gt 180 ]]; then
+            echo "Service has not been restarted recently"
+            exit 1
+          fi
+
+      - name: check response
+        run: |
+          curl https://garmin-divesite-weather-widget-service.azurewebsites.net/data?lat=-43&lon=171 | jq -e ".properties.timeseries"
