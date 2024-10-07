@@ -89,7 +89,7 @@ jobs:
       - name: check uptime
         run: |
           sleep 180
-          UPTIME=$(curl https://garmin-divesite-weather-widget-service.azurewebsites.net/status | jq -r ".uptime")
+          UPTIME=$(curl https://garmin-divesite-weather-widget-service.azurewebsites.net/status | jq -r ".uptime" | awk '{print int($1)}')
           if [[ "${UPTIME}" -gt 360 ]]; then
             echo "Service has not been restarted recently"
             exit 1
