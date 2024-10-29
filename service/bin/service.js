@@ -18,12 +18,21 @@ const port = normalizePort(process.env.PORT || 8080);
 
 const app = express();
 
+var totalRequests = 0;
+var locations = new Map();
+var totalApplicationErrors = 0;
+var totalNotFoundErrors = 0;
+
 app.get('/data', getData);
 
 app.get('/status', (req, res) => {
     res.json({
         status: 'ok',
         uptime: process.uptime(),
+	requests: totalRequests,
+	locations: locations.size,
+	application_errors: totalApplicationErrors,
+	not_found_errors: totalNotFoundErrors,
     });
 });
 
@@ -34,7 +43,9 @@ app.get('/', (req, res) => {
 app.use((req, res, next) => {
     debug(`Invalid path: ${req.url}`);
 
-    next(Object.assign(new Error('Not found'), { status: 404 }));
+    totalNotFoundErrors++;
+
+    res.status(404).json({ error: 'Not found' });
 });
 
 app.listen(port, () => {
@@ -44,6 +55,8 @@ app.listen(port, () => {
 async function getData(req, res, next) {
     debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
     debug(`Request query:${JSON.stringify(req.query, null, 2)}`);
+
+    totalRequests++;
 
     if (Object.keys(req.query).length !== 2 || !Object.hasOwn(req.query, 'lat') || !Object.hasOwn(req.query, 'lon')) {
         debug(`Invalid URL parameters: ${req.url}`);
@@ -73,6 +86,8 @@ async function getData(req, res, next) {
 
         return;
     }
+
+    locations.set(`${latitude}/${longitude}`, new Date());
 
     try {
         let result = await fetchData(latitude, longitude);
@@ -180,7 +195,9 @@ function getDay(localTime, days) {
 }
 
 function returnBadRequest(req, res, next) {
-    next(Object.assign(new Error('Bad request'), { status: 400 }));
+    totalApplicationErrors++;
+
+    res.status(400).json({ error: 'Bad request' });
 }
 
 function normalizePort(val) {
