@@ -15,7 +15,7 @@
   "dependencies": {
     "@photostructure/tz-lookup": "^11.0.0",
     "debug": "^4.3.7",
-    "express": "^4.21.1",
+    "express": "^5.0.1",
     "make-fetch-happen": "^14.0.3",
     "mkdirp": "^3.0.1",
     "moment-timezone": "^0.5.46"
