@@ -51,7 +51,7 @@ jobs:
     if: github.event_name == 'push'
     needs: build
     environment:
-      name: 'Production'
+      name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -77,7 +77,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'garmin-divesite-weather-widget-service'
-          slot-name: 'Production'
+          slot-name: 'production'
           package: .
 
   smoke-test:
