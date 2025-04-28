@@ -21,7 +21,7 @@
     "moment-timezone": "^0.5.48"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.10"
   },
   "nodemonConfig": {
     "ignore": [
