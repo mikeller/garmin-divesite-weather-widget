@@ -64,3 +64,5 @@ node_modules
 *.swp
 
 /service/.env
+
+.DS_Store
