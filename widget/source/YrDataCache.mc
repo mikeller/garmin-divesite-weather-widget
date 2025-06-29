@@ -37,6 +37,6 @@ class YrDataCache {
         var expiresString = (properties["meta"] as Dictionary<String, String>)["expires"] as String?;
         Utils.log("Cache update (expiry: " + expiresString + "): " + Utils.locationToString(latitude, longitude));
 
-        Storage.setValue(Utils.locationToString(latitude, longitude), data);
+        Storage.setValue(Utils.locationToString(latitude, longitude), data as PropertyValueType);
     }
 }

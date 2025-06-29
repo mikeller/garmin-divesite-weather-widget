@@ -14,7 +14,7 @@ class WeatherAppProperties {
             while (i < locations.size()) {
                 var location = locations[i];
                 var latitude = location["latitude"] as Float;
-                var latitudeSanitised = Math.round(latitude * 1000) / 1000;
+                var latitudeSanitised = Math.round(latitude * 1000) / 1000 as Float;
                 if (latitudeSanitised != latitude) {
                     location["latitude"] = latitudeSanitised;
 
@@ -24,7 +24,7 @@ class WeatherAppProperties {
                 }
 
                 var longitude = location["longitude"] as Float;
-                var longitudeSanitised = Math.round(longitude * 1000) / 1000;
+                var longitudeSanitised = Math.round(longitude * 1000) / 1000 as Float;
                 if (longitudeSanitised != longitude) {
                     location["longitude"] = longitudeSanitised;
 
