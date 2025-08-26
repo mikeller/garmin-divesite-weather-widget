@@ -16,7 +16,7 @@
     "@photostructure/tz-lookup": "^11.2.0",
     "debug": "^4.4.1",
     "express": "^5.1.0",
-    "make-fetch-happen": "^15.0.0",
+    "make-fetch-happen": "^15.0.1",
     "mkdirp": "^3.0.1",
     "moment-timezone": "^0.6.0"
   },
