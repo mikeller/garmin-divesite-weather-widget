@@ -3,11 +3,14 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const fetch = require('make-fetch-happen').defaults({ cachePath: './cache' });
 const tzlookup = require("@photostructure/tz-lookup");
 const moment = require('moment-timezone');
 const debug = require('debug')('service:server');
+const helmet = require('helmet');
 
 const locationForecastUrl = 'https://api.met.no/weatherapi/locationforecast/2.0/compact.json';
 const projectUrl = 'https://github.com/mikeller/garmin-divesite-weather-widget';
@@ -15,8 +18,36 @@ const projectUrl = 'https://github.com/mikeller/garmin-divesite-weather-widget';
 const userAgentString = `${process.env.npm_package_name}/${process.env.npm_package_version} ${projectUrl}`;
 
 const port = normalizePort(process.env.PORT || 8080);
+const locationApiKey = process.env.LOCATION_API_KEY;
+if (!locationApiKey) {
+  debug('WARNING: LOCATION_API_KEY is not set. /locations will be unreachable (401). Set env to enable.');
+}
 
 const app = express();
+
+// Middleware
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, '../public')));
+// Static assets: enable caching in prod (ETag is on by default)
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: process.env.NODE_ENV === 'production' ? '1h' : 0,
+  etag: true,
+}));
+
+app.use(helmet());
+
+
+// API Key validation middleware
+function requireLocationApiKey(req, res, next) {
+    const providedKey = req.cookies.locationApiKey;
+    
+    if (!locationApiKey || !providedKey || providedKey !== locationApiKey) {
+        debug(`Unauthorized access attempt to ${req.path}. Provided key: ${providedKey ? 'present but invalid' : 'missing'}`);
+        return res.status(401).json({ error: 'Unauthorized. Valid API key required in cookie.' });
+    }
+    
+    next();
+}
 
 var totalRequests = 0;
 var locations = new Map();
@@ -25,14 +56,46 @@ var totalNotFoundErrors = 0;
 
 app.get('/data', getData);
 
+app.get('/locations', requireLocationApiKey, (req, res) => {
+    debug('Locations endpoint accessed');
+    
+    res.set('Cache-Control', 'no-store');
+
+    const locationsList = [];
+    
+    for (const [locationKey, data] of locations.entries()) {
+        const [lat, lon] = locationKey.split('/');
+        locationsList.push({
+            latitude: parseFloat(lat),
+            longitude: parseFloat(lon),
+            request_count: data.count,
+            last_requested: data.lastRequested.toISOString()
+        });
+    }
+    
+    // Sort by request count (descending) then by last requested (most recent first)
+    locationsList.sort((a, b) => {
+        if (b.request_count !== a.request_count) {
+            return b.request_count - a.request_count;
+        }
+        return new Date(b.last_requested) - new Date(a.last_requested);
+    });
+    
+    res.json({
+        total_unique_locations: locations.size,
+        total_requests_all_locations: locationsList.reduce((sum, loc) => sum + loc.request_count, 0),
+        locations: locationsList
+    });
+});
+
 app.get('/status', (req, res) => {
     res.json({
         status: 'ok',
         uptime: process.uptime(),
-	requests: totalRequests,
-	locations: locations.size,
-	application_errors: totalApplicationErrors,
-	not_found_errors: totalNotFoundErrors,
+        requests: totalRequests,
+        locations: locations.size,
+        application_errors: totalApplicationErrors,
+        not_found_errors: totalNotFoundErrors,
     });
 });
 
@@ -53,7 +116,7 @@ app.listen(port, () => {
 });
 
 async function getData(req, res, next) {
-    debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
+    //debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
     debug(`Request query:${JSON.stringify(req.query, null, 2)}`);
 
     totalRequests++;
@@ -87,7 +150,16 @@ async function getData(req, res, next) {
         return;
     }
 
-    locations.set(`${latitude}/${longitude}`, new Date());
+    const latKey = parseFloat(latitude).toFixed(3);
+    const lonKey = parseFloat(longitude).toFixed(3);
+    const locationKey = `${latKey}/${lonKey}`;
+    const existingLocation = locations.get(locationKey);
+    if (existingLocation) {
+        existingLocation.count++;
+        existingLocation.lastRequested = new Date();
+    } else {
+        locations.set(locationKey, { count: 1, lastRequested: new Date() });
+    }
 
     try {
         let result = await fetchData(latitude, longitude);
