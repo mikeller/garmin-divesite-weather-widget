@@ -28,7 +28,12 @@ const app = express();
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// API Key validation middleware
+/**
+ * Express middleware that requires a valid API key stored in the `locationApiKey` cookie.
+ *
+ * If the cookie is missing or does not match the configured `locationApiKey`, responds with HTTP 401
+ * and a JSON error body. Otherwise calls `next()` to continue request handling.
+ */
 function requireLocationApiKey(req, res, next) {
     const providedKey = req.cookies.locationApiKey;
     
@@ -106,6 +111,19 @@ app.listen(port, () => {
     debug(`Listening on port ${port}.`);
 });
 
+/**
+ * Handle GET /data requests: validate lat/lon query, update request statistics, fetch and return transformed data.
+ *
+ * Validates that the request query contains exactly `lat` and `lon`, checks their numeric format and geographic ranges,
+ * and responds with HTTP 400 via `returnBadRequest` on invalid input. On valid input, increments `totalRequests`,
+ * updates the `locations` map (per-location `{ count, lastRequested }`), calls `fetchData(latitude, longitude)`,
+ * sets the response `Expires` header from `result.properties.meta.expires`, and returns the JSON payload.
+ * Any errors from `fetchData` are forwarded to Express via `next(error)`.
+ *
+ * Note: This function sends HTTP responses and mutates module-level state (`totalRequests`, `locations`).
+ *
+ * @returns {Promise<void>} Resolves after a response is sent or an error is forwarded to `next`.
+ */
 async function getData(req, res, next) {
     //debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
     debug(`Request query:${JSON.stringify(req.query, null, 2)}`);
