@@ -3,6 +3,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const fetch = require('make-fetch-happen').defaults({ cachePath: './cache' });
@@ -16,18 +17,19 @@ const projectUrl = 'https://github.com/mikeller/garmin-divesite-weather-widget';
 const userAgentString = `${process.env.npm_package_name}/${process.env.npm_package_version} ${projectUrl}`;
 
 const port = normalizePort(process.env.PORT || 8080);
-const apiKey = process.env.API_KEY;
+const locationApiKey = process.env.LOCATION_API_KEY;
 
 const app = express();
 
 // Middleware
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, '../public')));
 
 // API Key validation middleware
 function requireApiKey(req, res, next) {
     const providedKey = req.cookies.apiKey;
     
-    if (!apiKey || !providedKey || providedKey !== apiKey) {
+    if (!locationApiKey || !providedKey || providedKey !== locationApiKey) {
         debug(`Unauthorized access attempt to ${req.path}. Provided key: ${providedKey ? 'present but invalid' : 'missing'}`);
         return res.status(401).json({ error: 'Unauthorized. Valid API key required in cookie.' });
     }
