@@ -26,13 +26,29 @@ var totalNotFoundErrors = 0;
 app.get('/data', getData);
 
 app.get('/status', (req, res) => {
+    // Calculate total requests across all locations
+    const totalLocationRequests = Array.from(locations.values()).reduce((sum, location) => sum + location.count, 0);
+    
+    // Create location details for response
+    const locationDetails = {};
+    for (const [key, value] of locations.entries()) {
+        locationDetails[key] = {
+            requests: value.count,
+            lastRequested: value.lastRequested.toISOString()
+        };
+    }
+    
     res.json({
         status: 'ok',
         uptime: process.uptime(),
-	requests: totalRequests,
-	locations: locations.size,
-	application_errors: totalApplicationErrors,
-	not_found_errors: totalNotFoundErrors,
+        requests: totalRequests,
+        locations: {
+            unique: locations.size,
+            total_requests: totalLocationRequests,
+            details: locationDetails
+        },
+        application_errors: totalApplicationErrors,
+        not_found_errors: totalNotFoundErrors,
     });
 });
 
@@ -87,7 +103,14 @@ async function getData(req, res, next) {
         return;
     }
 
-    locations.set(`${latitude}/${longitude}`, new Date());
+    const locationKey = `${latitude}/${longitude}`;
+    const existingLocation = locations.get(locationKey);
+    if (existingLocation) {
+        existingLocation.count++;
+        existingLocation.lastRequested = new Date();
+    } else {
+        locations.set(locationKey, { count: 1, lastRequested: new Date() });
+    }
 
     try {
         let result = await fetchData(latitude, longitude);
