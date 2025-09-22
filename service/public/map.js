@@ -3,6 +3,7 @@ class LocationMap {
     constructor() {
         this.map = null;
         this.markers = [];
+        this.markerLayer = null;
         this.locations = [];
         this.init();
     }
@@ -15,6 +16,10 @@ class LocationMap {
     initMap() {
         // Initialize the map centered on the world
         this.map = L.map('map').setView([20, 0], 2);
+        this.markerLayer = L.layerGroup().addTo(this.map);
+        this._hasUserInteracted = false;
+        this._hasFitOnce = false;
+        this.map.on('zoomstart dragstart movestart', () => { this._hasUserInteracted = true; });
 
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -26,10 +31,9 @@ class LocationMap {
     async loadLocations() {
         try {
             const response = await fetch('/locations', {
-                credentials: 'include', // Include cookies
-                headers: {
-                    'Accept': 'application/json'
-                }
+                credentials: 'include',
+                cache: 'no-store',
+                headers: { 'Accept': 'application/json' }
             });
 
             if (!response.ok) {
@@ -42,6 +46,7 @@ class LocationMap {
             const data = await response.json();
             this.locations = data.locations;
             
+            this.clearError();
             this.hideLoading();
             this.updateStats(data);
             this.addMarkersToMap();
@@ -52,6 +57,13 @@ class LocationMap {
             this.showError(error.message);
             this.hideLoading();
         }
+    }
+
+    clearError() {
+        const el = document.getElementById('errorMsg');
+        if (!el) return;
+        el.textContent = '';
+        el.classList.remove('show');
     }
 
     updateStats(data) {
@@ -66,7 +78,7 @@ class LocationMap {
 
     addMarkersToMap() {
         // Clear existing markers
-        this.markers.forEach(marker => this.map.removeLayer(marker));
+        if (this.markerLayer) this.markerLayer.clearLayers();
         this.markers = [];
 
         if (this.locations.length === 0) {
@@ -74,14 +86,19 @@ class LocationMap {
             return;
         }
 
-        // Find min/max request counts for scaling
-        const requestCounts = this.locations.map(loc => loc.request_count);
-        const minRequests = Math.min(...requestCounts);
-        const maxRequests = Math.max(...requestCounts);
+        // Find min/max request counts for scaling (single pass; no spread)
+        let minRequests = Number.POSITIVE_INFINITY;
+        let maxRequests = Number.NEGATIVE_INFINITY;
+        for (const loc of this.locations) {
+            const v = Number(loc.request_count) || 0;
+            if (v < minRequests) minRequests = v;
+            if (v > maxRequests) maxRequests = v;
+        }
+        if (!isFinite(minRequests)) { minRequests = 0; maxRequests = 0; }
 
         this.locations.forEach(location => {
             const marker = this.createMarker(location, minRequests, maxRequests);
-            marker.addTo(this.map);
+            marker.addTo(this.markerLayer);
             this.markers.push(marker);
         });
     }
@@ -180,27 +197,28 @@ class LocationMap {
 
     formatTimeAgo(date) {
         const now = new Date();
-        const diffMs = now - date;
+        const diffMs = Math.max(0, now - date);
         const diffSeconds = Math.floor(diffMs / 1000);
         const diffMinutes = Math.floor(diffSeconds / 60);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
 
         if (diffSeconds < 60) {
-            return `${diffSeconds} seconds ago`;
+            return `${diffSeconds} second${diffSeconds !== 1 ? 's' : ''} ago`;
         } else if (diffMinutes < 60) {
-            return `${diffMinutes} minutes ago`;
+            return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
         } else if (diffHours < 24) {
-            return `${diffHours} hours ago`;
+            return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
         } else if (diffDays === 1) {
             return '1 day ago';
         } else {
-            return `${diffDays} days ago`;
+            return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
         }
     }
 
     fitMapToMarkers() {
         if (this.markers.length === 0) return;
+        if (this._hasUserInteracted || this._hasFitOnce) return;
 
         if (this.markers.length === 1) {
             // If only one marker, center on it with a reasonable zoom
@@ -211,35 +229,46 @@ class LocationMap {
             const group = new L.featureGroup(this.markers);
             this.map.fitBounds(group.getBounds().pad(0.1));
         }
+        this._hasFitOnce = true;
     }
 
     hideLoading() {
-        document.getElementById('loading').classList.add('hidden');
+        const el = document.getElementById('loading');
+        if (el) el.classList.add('hidden');
     }
 
     showError(message) {
         const errorElement = document.getElementById('errorMsg');
+        if (!errorElement) return;
         errorElement.textContent = message;
         errorElement.classList.add('show');
     }
 }
 
 // Initialize the map when the page loads
+let locationMapInstance;
 document.addEventListener('DOMContentLoaded', () => {
-    new LocationMap();
+    locationMapInstance = new LocationMap();
+    window._locationMap = locationMapInstance; // optional global for debugging
 });
 
 // Add refresh functionality
 document.addEventListener('keydown', (e) => {
     if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+        const ae = document.activeElement;
+        const tag = ae && ae.tagName;
+        const inEditable = ae?.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(tag);
+        if (inEditable) return;
         e.preventDefault();
-        location.reload();
+        if (locationMapInstance && !locationMapInstance._loading) {
+            locationMapInstance.loadLocations();
+        }
     }
 });
 
 // Auto-refresh every 5 minutes
 setInterval(() => {
-    if (document.visibilityState === 'visible') {
-        location.reload();
+    if (document.visibilityState === 'visible' && locationMapInstance && !locationMapInstance._loading && navigator.onLine) {
+        locationMapInstance.loadLocations();
     }
 }, 5 * 60 * 1000);

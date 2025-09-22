@@ -18,6 +18,9 @@ const userAgentString = `${process.env.npm_package_name}/${process.env.npm_packa
 
 const port = normalizePort(process.env.PORT || 8080);
 const locationApiKey = process.env.LOCATION_API_KEY;
+if (!locationApiKey) {
+  debug('WARNING: LOCATION_API_KEY is not set. /locations will be unreachable (401). Set env to enable.');
+}
 
 const app = express();
 
@@ -26,8 +29,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
 // API Key validation middleware
-function requireApiKey(req, res, next) {
-    const providedKey = req.cookies.apiKey;
+function requireLocationApiKey(req, res, next) {
+    const providedKey = req.cookies.locationApiKey;
     
     if (!locationApiKey || !providedKey || providedKey !== locationApiKey) {
         debug(`Unauthorized access attempt to ${req.path}. Provided key: ${providedKey ? 'present but invalid' : 'missing'}`);
@@ -44,9 +47,11 @@ var totalNotFoundErrors = 0;
 
 app.get('/data', getData);
 
-app.get('/locations', requireApiKey, (req, res) => {
+app.get('/locations', requireLocationApiKey, (req, res) => {
     debug('Locations endpoint accessed');
     
+    res.set('Cache-Control', 'no-store');
+
     const locationsList = [];
     
     for (const [locationKey, data] of locations.entries()) {
@@ -102,7 +107,7 @@ app.listen(port, () => {
 });
 
 async function getData(req, res, next) {
-    debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
+    //debug(`Request headers:${JSON.stringify(req.headers, null, 2)}`);
     debug(`Request query:${JSON.stringify(req.query, null, 2)}`);
 
     totalRequests++;
@@ -136,7 +141,9 @@ async function getData(req, res, next) {
         return;
     }
 
-    const locationKey = `${latitude}/${longitude}`;
+    const latKey = parseFloat(latitude).toFixed(3);
+    const lonKey = parseFloat(longitude).toFixed(3);
+    const locationKey = `${latKey}/${lonKey}`;
     const existingLocation = locations.get(locationKey);
     if (existingLocation) {
         existingLocation.count++;
