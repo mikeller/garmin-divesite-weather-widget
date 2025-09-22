@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const fetch = require('make-fetch-happen').defaults({ cachePath: './cache' });
 const tzlookup = require("@photostructure/tz-lookup");
 const moment = require('moment-timezone');
@@ -15,8 +16,24 @@ const projectUrl = 'https://github.com/mikeller/garmin-divesite-weather-widget';
 const userAgentString = `${process.env.npm_package_name}/${process.env.npm_package_version} ${projectUrl}`;
 
 const port = normalizePort(process.env.PORT || 8080);
+const apiKey = process.env.API_KEY;
 
 const app = express();
+
+// Middleware
+app.use(cookieParser());
+
+// API Key validation middleware
+function requireApiKey(req, res, next) {
+    const providedKey = req.cookies.apiKey;
+    
+    if (!apiKey || !providedKey || providedKey !== apiKey) {
+        debug(`Unauthorized access attempt to ${req.path}. Provided key: ${providedKey ? 'present but invalid' : 'missing'}`);
+        return res.status(401).json({ error: 'Unauthorized. Valid API key required in cookie.' });
+    }
+    
+    next();
+}
 
 var totalRequests = 0;
 var locations = new Map();
@@ -25,28 +42,42 @@ var totalNotFoundErrors = 0;
 
 app.get('/data', getData);
 
-app.get('/status', (req, res) => {
-    // Calculate total requests across all locations
-    const totalLocationRequests = Array.from(locations.values()).reduce((sum, location) => sum + location.count, 0);
+app.get('/locations', requireApiKey, (req, res) => {
+    debug('Locations endpoint accessed');
     
-    // Create location details for response
-    const locationDetails = {};
-    for (const [key, value] of locations.entries()) {
-        locationDetails[key] = {
-            requests: value.count,
-            lastRequested: value.lastRequested.toISOString()
-        };
+    const locationsList = [];
+    
+    for (const [locationKey, data] of locations.entries()) {
+        const [lat, lon] = locationKey.split('/');
+        locationsList.push({
+            latitude: parseFloat(lat),
+            longitude: parseFloat(lon),
+            request_count: data.count,
+            last_requested: data.lastRequested.toISOString()
+        });
     }
     
+    // Sort by request count (descending) then by last requested (most recent first)
+    locationsList.sort((a, b) => {
+        if (b.request_count !== a.request_count) {
+            return b.request_count - a.request_count;
+        }
+        return new Date(b.last_requested) - new Date(a.last_requested);
+    });
+    
+    res.json({
+        total_unique_locations: locations.size,
+        total_requests_all_locations: locationsList.reduce((sum, loc) => sum + loc.request_count, 0),
+        locations: locationsList
+    });
+});
+
+app.get('/status', (req, res) => {
     res.json({
         status: 'ok',
         uptime: process.uptime(),
         requests: totalRequests,
-        locations: {
-            unique: locations.size,
-            total_requests: totalLocationRequests,
-            details: locationDetails
-        },
+        locations: locations.size,
         application_errors: totalApplicationErrors,
         not_found_errors: totalNotFoundErrors,
     });
