@@ -64,13 +64,15 @@ app.get('/locations', requireLocationApiKey, (req, res) => {
     const locationsList = [];
     
     for (const [locationKey, data] of locations.entries()) {
+    if (locationKey !== '0.000/0.000') { // Ignore the "test" location
         const [lat, lon] = locationKey.split('/');
-        locationsList.push({
-            latitude: parseFloat(lat),
-            longitude: parseFloat(lon),
-            request_count: data.count,
-            last_requested: data.lastRequested.toISOString()
-        });
+            locationsList.push({
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lon),
+                request_count: data.count,
+                last_requested: data.lastRequested.toISOString()
+            });
+        }
     }
     
     // Sort by request count (descending) then by last requested (most recent first)

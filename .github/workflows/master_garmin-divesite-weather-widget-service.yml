@@ -99,7 +99,7 @@ jobs:
 
       - name: check response
         run: |
-          curl https://garmin-divesite-weather-widget-service.azurewebsites.net/data\?lat=-43\&lon=171 | jq -e ".properties.timeseries"
+          curl https://garmin-divesite-weather-widget-service.azurewebsites.net/data\?lat=-0.000\&lon=0.000 | jq -e ".properties.timeseries"
           if [[ $? -ne 0 ]]; then
             echo "Service did not return a timeseries"
             exit 1
