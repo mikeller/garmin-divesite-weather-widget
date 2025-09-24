@@ -147,8 +147,6 @@ class LocationMap {
         });
 
         // Ensure popup only opens on click (override default hover behavior)
-        marker.off('mouseover', marker.openPopup);
-        marker.off('mouseout', marker.closePopup);
 
         return marker;
     }
@@ -256,7 +254,7 @@ class LocationMap {
         
         // Calculate the distance represented by 40 pixels using Web Mercator projection
         // At the equator, one degree of longitude equals approximately 111,320 meters
-        // This is adjusted by the cosine of latitude for accurate measurement
+        // Leaflet's distanceTo() method automatically accounts for latitude adjustment and projection
         const pixelWidth = 40; // The ruler width in pixels
         
         // Get the pixel bounds of the ruler
