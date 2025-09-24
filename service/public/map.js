@@ -26,6 +26,11 @@ class LocationMap {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 18
         }).addTo(this.map);
+
+        // Add scale update listener
+        this.map.on('zoomend', () => {
+            this.updateScaleIndicator();
+        });
     }
 
     async loadLocations() {
@@ -122,9 +127,8 @@ class LocationMap {
         const popupContent = this.createPopupContent(location);
         marker.bindPopup(popupContent);
 
-        // Add hover effects
+        // Add hover effects for visual feedback only
         marker.on('mouseover', function(e) {
-            this.openPopup();
             this.setStyle({
                 weight: 3,
                 fillOpacity: Math.min(opacity + 0.2, 1)
@@ -230,6 +234,35 @@ class LocationMap {
             this.map.fitBounds(group.getBounds().pad(0.1));
         }
         this._hasFitOnce = true;
+        
+        // Update scale indicator after fitting
+        setTimeout(() => this.updateScaleIndicator(), 100);
+    }
+
+    updateScaleIndicator() {
+        const scaleElement = document.getElementById('scaleText');
+        if (!scaleElement) return;
+        
+        const zoom = this.map.getZoom();
+        let scaleText = '';
+        
+        if (zoom <= 3) {
+            scaleText = '~2000km';
+        } else if (zoom <= 5) {
+            scaleText = '~500km';
+        } else if (zoom <= 7) {
+            scaleText = '~100km';
+        } else if (zoom <= 9) {
+            scaleText = '~25km';
+        } else if (zoom <= 11) {
+            scaleText = '~5km';
+        } else if (zoom <= 13) {
+            scaleText = '~1km';
+        } else {
+            scaleText = '~500m';
+        }
+        
+        scaleElement.textContent = scaleText;
     }
 
     hideLoading() {
