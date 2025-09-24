@@ -27,8 +27,8 @@ class LocationMap {
             maxZoom: 18
         }).addTo(this.map);
 
-        // Add scale update listener
-        this.map.on('zoomend', () => {
+        // Add scale update listeners for both zoom and pan operations
+        this.map.on('zoomend moveend', () => {
             this.updateScaleIndicator();
         });
     }
@@ -56,6 +56,7 @@ class LocationMap {
             this.updateStats(data);
             this.addMarkersToMap();
             this.fitMapToMarkers();
+            this.updateScaleIndicator();
 
         } catch (error) {
             console.error('Error loading locations:', error);
@@ -125,7 +126,10 @@ class LocationMap {
 
         // Create popup content
         const popupContent = this.createPopupContent(location);
-        marker.bindPopup(popupContent);
+        marker.bindPopup(popupContent, {
+            closeOnClick: true,
+            autoClose: true
+        });
 
         // Add hover effects for visual feedback only
         marker.on('mouseover', function(e) {
@@ -141,6 +145,10 @@ class LocationMap {
                 fillOpacity: opacity
             });
         });
+
+        // Ensure popup only opens on click (override default hover behavior)
+        marker.off('mouseover', marker.openPopup);
+        marker.off('mouseout', marker.closePopup);
 
         return marker;
     }
@@ -235,31 +243,56 @@ class LocationMap {
         }
         this._hasFitOnce = true;
         
-        // Update scale indicator after fitting
-        setTimeout(() => this.updateScaleIndicator(), 100);
+        // Scale indicator will be updated automatically via the moveend event
     }
 
     updateScaleIndicator() {
         const scaleElement = document.getElementById('scaleText');
         if (!scaleElement) return;
         
+        // Get the current map center and bounds for calculation
+        const center = this.map.getCenter();
         const zoom = this.map.getZoom();
-        let scaleText = '';
         
-        if (zoom <= 3) {
-            scaleText = '~2000km';
-        } else if (zoom <= 5) {
-            scaleText = '~500km';
-        } else if (zoom <= 7) {
-            scaleText = '~100km';
-        } else if (zoom <= 9) {
-            scaleText = '~25km';
-        } else if (zoom <= 11) {
-            scaleText = '~5km';
-        } else if (zoom <= 13) {
-            scaleText = '~1km';
+        // Calculate the distance represented by 40 pixels using Web Mercator projection
+        // At the equator, one degree of longitude equals approximately 111,320 meters
+        // This is adjusted by the cosine of latitude for accurate measurement
+        const pixelWidth = 40; // The ruler width in pixels
+        
+        // Get the pixel bounds of the ruler
+        const mapSize = this.map.getSize();
+        const containerPoint1 = L.point(mapSize.x / 2, mapSize.y / 2);
+        const containerPoint2 = L.point(mapSize.x / 2 + pixelWidth, mapSize.y / 2);
+        
+        // Convert pixel points to geographic coordinates
+        const latLng1 = this.map.containerPointToLatLng(containerPoint1);
+        const latLng2 = this.map.containerPointToLatLng(containerPoint2);
+        
+        // Calculate the distance between these points using Leaflet's distance method
+        // This accounts for the Web Mercator projection and latitude adjustment
+        const distanceInMeters = latLng1.distanceTo(latLng2);
+        
+        let scaleText = '';
+        let displayDistance = distanceInMeters;
+        
+        // Format the distance with appropriate units and precision
+        if (distanceInMeters >= 1000) {
+            displayDistance = distanceInMeters / 1000;
+            if (displayDistance >= 100) {
+                scaleText = `${Math.round(displayDistance)}km`;
+            } else if (displayDistance >= 10) {
+                scaleText = `${displayDistance.toFixed(1)}km`;
+            } else {
+                scaleText = `${displayDistance.toFixed(2)}km`;
+            }
         } else {
-            scaleText = '~500m';
+            if (distanceInMeters >= 100) {
+                scaleText = `${Math.round(distanceInMeters)}m`;
+            } else if (distanceInMeters >= 10) {
+                scaleText = `${distanceInMeters.toFixed(1)}m`;
+            } else {
+                scaleText = `${distanceInMeters.toFixed(2)}m`;
+            }
         }
         
         scaleElement.textContent = scaleText;
