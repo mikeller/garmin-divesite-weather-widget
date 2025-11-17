@@ -18,7 +18,7 @@
     "debug": "^4.4.3",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
-    "make-fetch-happen": "^15.0.2",
+    "make-fetch-happen": "^15.0.3",
     "mkdirp": "^3.0.1",
     "moment-timezone": "^0.6.0"
   },
