@@ -20,7 +20,7 @@
     "helmet": "^8.1.0",
     "make-fetch-happen": "^15.0.5",
     "mkdirp": "^3.0.1",
-    "moment-timezone": "^0.6.0"
+    "moment-timezone": "^0.6.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
