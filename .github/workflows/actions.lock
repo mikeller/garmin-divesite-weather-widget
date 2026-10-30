@@ -8,7 +8,7 @@ workflows:
         - 'actions/download-artifact@v4.3.0'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v4.6.2'
-        - 'azure/login@v2.3.1'
+        - 'azure/login@v3.1.0'
         - 'azure/webapps-deploy@v3.0.8'
     '.github/workflows/verify-lockfile.yml':
         - 'actions/checkout@v4.4.0'
@@ -33,9 +33,9 @@ dependencies:
         commit: 'sha1-ea165f8d65b6e75b540449e92b4886f43607fa02'
         owner_id: 44036562
         repo_id: 192625955
-    'azure/login@v2.3.1':
-        ref: 'v2.3.1'
-        commit: 'sha1-7184910d9eb2b1c5e48f7073824a90609bb9b6d6'
+    'azure/login@v3.1.0':
+        ref: 'v3.1.0'
+        commit: 'sha1-a641126d1b8aa4d1fa005f4f92df94a3a4c4c906'
         owner_id: 6844498
         repo_id: 210798615
     'azure/webapps-deploy@v3.0.8':
