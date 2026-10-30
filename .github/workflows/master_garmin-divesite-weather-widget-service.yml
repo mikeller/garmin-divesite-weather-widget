@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.4.0
         with:
           node-version: '22.x'
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Upload artifact for deployment job
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: node-app
           path: release.zip
@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.3.0
         with:
           name: node-app
 
@@ -66,7 +66,7 @@ jobs:
         run: unzip release.zip
 
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v2.3.1
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_56115497CDBA4D51B2FFC4D09078FE2E }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CA4D87AA4CBA44BC8C77395DA5EBFD0D }}
@@ -74,7 +74,7 @@ jobs:
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v3.0.8
         with:
           app-name: 'garmin-divesite-weather-widget-service'
           slot-name: 'production'
