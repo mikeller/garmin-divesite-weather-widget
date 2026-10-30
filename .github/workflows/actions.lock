@@ -10,6 +10,8 @@ workflows:
         - 'actions/upload-artifact@v4.6.2'
         - 'azure/login@v2.3.1'
         - 'azure/webapps-deploy@v3.0.8'
+    '.github/workflows/verify-lockfile.yml':
+        - 'actions/checkout@v4.4.0'
 dependencies:
     'actions/checkout@v4.4.0':
         ref: 'v4.4.0'
